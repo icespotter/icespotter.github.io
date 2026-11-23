@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IceSpotter – winter sidewalk hazard map of Riga</title>
+<meta name="description" content="IceSpotter finds icy, snowy and wet sidewalks in Riga from camera photos and shows them on a map, so winter maintenance crews know where to go first. RobotHack 2026 project for Rīgas pašvaldība.">
+<meta name="keywords" content="IceSpotter, Riga, Rīga, icy sidewalks, ledus ietves, winter maintenance, computer vision, RobotHack 2026, RTU">
+<link rel="canonical" href="https://icespotter.github.io/">
+<meta property="og:title" content="IceSpotter – winter sidewalk hazard map of Riga">
+<meta property="og:description" content="Cameras on city vehicles → neural network → a map of Riga and a list of where to send crews first.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://icespotter.github.io/">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧊</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"IceSpotter","applicationCategory":"Public safety","operatingSystem":"Web","description":"Winter sidewalk hazard map of Riga built from camera photos and a neural network.","url":"https://icespotter.github.io/"}
+</script>
+<style>
+:root{
+  --frost:#E8EDF0; --paper:#F7F9FA; --ink:#17222B; --ink2:#4A5866; --line:#CBD5DC;
+  --high:#C3352B; --medium:#DD7A1C; --low:#D9AE12; --clear:#3D8A57; --treated:#2B6B44; --hidden:#8C98A3;
+  --signal:#1C5AA6;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--frost);color:var(--ink);font:400 16px/1.5 Barlow,system-ui,sans-serif}
+a{color:var(--signal)}
+:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
+h1,h2,h3{font-family:"Barlow Condensed",Barlow,sans-serif;font-weight:700;line-height:1.05;margin:0}
+.wrap{max-width:1360px;margin:0 auto;padding:0 20px}
+
+/* header */
+header{background:var(--ink);color:#EEF3F6}
+header .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 16px;padding-top:14px;padding-bottom:14px}
+.brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.brand b{font:700 28px/1 "Barlow Condensed",sans-serif;letter-spacing:.5px}
+.brand span{color:#A9B8C4;font-size:15px}
+.lang{display:flex;border:1px solid #3B4A57;border-radius:6px;overflow:hidden}
+.lang button{background:none;border:0;color:#C9D4DC;padding:6px 12px;font:600 14px Barlow,sans-serif;cursor:pointer}
+.lang button[aria-pressed=true]{background:#EEF3F6;color:var(--ink)}
+
+/* hero: the map is the hero */
+.hero{display:grid;grid-template-columns:380px 1fr;gap:0;min-height:640px;border-bottom:1px solid var(--line)}
+.rail{background:var(--paper);padding:24px 20px;display:flex;flex-direction:column;gap:20px;border-right:1px solid var(--line);max-height:780px;overflow:auto}
+.rail h1{font-size:44px;letter-spacing:-.3px}
+.rail .lead{margin:8px 0 0;color:var(--ink2);font-size:16px;max-width:34ch}
+#map{min-height:640px;height:100%;background:#dde4e8}
+
+.temp{display:grid;gap:8px;padding:14px;background:#fff;border:1px solid var(--line);border-radius:10px}
+.temp .now{font:700 30px/1 "Barlow Condensed",sans-serif}
+.temp label{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink2)}
+.temp input[type=range]{width:100%}
+
+.levels{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.lv{all:unset;cursor:pointer;display:grid;gap:2px;padding:8px 10px;border-radius:8px;background:#fff;border:1px solid var(--line)}
+.lv:focus-visible{outline:3px solid var(--signal)}
+.lv[aria-pressed=false]{opacity:.45}
+.lv .n{font:700 26px/1 "Barlow Condensed",sans-serif}
+.lv .t{font-size:13px;color:var(--ink2);display:flex;align-items:center;gap:6px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}
+
+.top h2{font-size:26px;margin-bottom:8px}
+.top ol{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.top li{display:grid;grid-template-columns:72px 1fr;gap:10px;background:#fff;border:1px solid var(--line);border-left:5px solid var(--c);border-radius:8px;padding:8px}
+.top img{width:72px;height:54px;object-fit:cover;border-radius:4px;background:#ccd}
+.top .sc{font:700 20px/1 "Barlow Condensed",sans-serif}
+.top .why{font-size:13px;color:var(--ink2);margin:2px 0 6px}
+.top button,.btn{font:600 14px Barlow,sans-serif;border-radius:6px;border:1px solid var(--ink);background:#fff;color:var(--ink);padding:5px 10px;cursor:pointer}
+.btn.primary{background:var(--ink);color:#fff}
+.top .goto{border:0;background:none;color:var(--signal);padding:0;text-decoration:underline}
+.empty{color:var(--ink2);font-size:15px}
+
+/* below */
+section.band{padding:48px 0;border-bottom:1px solid var(--line)}
+section.band h2{font-size:38px;margin-bottom:14px}
+.cols{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:start}
+.prose p{max-width:68ch;margin:0 0 12px}
+.steps{margin:0;padding-left:22px;display:grid;gap:8px;max-width:68ch}
+.check{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;display:grid;gap:14px}
+.drop{display:grid;place-items:center;text-align:center;border:2px dashed var(--line);border-radius:10px;padding:26px;cursor:pointer;color:var(--ink2)}
+.drop:focus-within{border-color:var(--signal)}
+.drop input{position:absolute;opacity:0;width:1px;height:1px}
+.result{display:grid;grid-template-columns:140px 1fr;gap:14px;align-items:start}
+.result img{width:140px;border-radius:8px}
+.bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%}
+.probs{display:grid;gap:4px;font-size:14px}
+.probs div{display:grid;grid-template-columns:96px 1fr 44px;gap:8px;align-items:center}
+.status{font-size:14px;color:var(--ink2)}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:8px}
+.facts div{border-top:3px solid var(--ink);padding-top:10px}
+.facts b{display:block;font:700 40px/1 "Barlow Condensed",sans-serif}
+footer{padding:28px 0 40px;font-size:14px;color:var(--ink2)}
+footer .wrap{display:grid;gap:6px}
+
+.leaflet-popup-content{font:14px/1.4 Barlow,sans-serif;margin:10px 12px}
+.leaflet-popup-content img{width:220px;border-radius:6px;display:block;margin-top:6px}
+
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr}
+  .rail{max-height:none;border-right:0}
+  #map{min-height:420px;height:420px;order:-1}
+  .cols{grid-template-columns:1fr}
+  .facts{grid-template-columns:1fr}
+  .rail h1{font-size:38px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="brand"><b>🧊 IceSpotter</b><span data-i="tag">RobotHack 2026 · challenge PCH4 for Rīgas pašvaldība</span></div>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="en" aria-pressed="true">English</button>
+      <button type="button" data-lang="lv" aria-pressed="false">Latviešu</button>
+    </div>
+  </div>
+</header>
+
+<main>
+<div class="hero">
+  <aside class="rail" aria-label="Controls and dispatch list">
+    <div>
+      <h1 data-i="title">Hazardous sidewalks of Riga</h1>
+      <p class="lead" data-i="lead">Cameras on city vehicles → neural network → a map and a list of where to send crews first.</p>
+    </div>
+
+    <div class="temp">
+      <div><span class="now" id="tNow">…</span> <span class="status" id="tSrc" data-i="tLoading">Loading Riga weather…</span></div>
+      <label><input type="checkbox" id="tManual"> <span data-i="tManual">Set temperature by hand (demo)</span></label>
+      <input type="range" id="tSlider" min="-15" max="10" step="0.5" value="0" disabled aria-label="Air temperature, °C">
+    </div>
+
+    <div class="levels" id="levels" aria-label="Show levels on the map"></div>
+
+    <div class="top">
+      <h2 data-i="topTitle">Top 10: send crews here first</h2>
+      <ol id="top"></ol>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn" id="csv" type="button" data-i="csv">Download report (CSV)</button>
+      <button class="btn" id="reset" type="button" data-i="reset">Reset “treated”</button>
+    </div>
+  </aside>
+  <div id="map" role="region" aria-label="Map of Riga with sidewalk hazards"></div>
+</div>
+
+<section class="band" id="check">
+  <div class="wrap cols">
+    <div class="prose">
+      <h2 data-i="checkTitle">Check a sidewalk photo</h2>
+      <p data-i="checkP1">Upload a photo of a sidewalk. The neural network runs right here in your browser – the photo is not sent anywhere.</p>
+      <p data-i="checkP2">If the photo has GPS, the point lands on the map at that place. If not, click the map to place it.</p>
+    </div>
+    <div class="check">
+      <label class="drop"><input type="file" id="file" accept="image/*"><span data-i="drop">Choose or drop a photo</span></label>
+      <label style="display:flex;gap:8px;align-items:center;font-size:14px"><input type="checkbox" id="roi"> <span data-i="roi">Wide frame from a vehicle: look only at the sidewalk in front (bottom centre)</span></label>
+      <div class="status" id="mStatus" aria-live="polite"></div>
+      <div id="result"></div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="about">
+  <div class="wrap cols">
+    <div class="prose">
+      <h2 data-i="aboutTitle">How it works</h2>
+      <ol class="steps">
+        <li data-i="s1">A camera on a bus or sidewalk tractor takes 1–3 frames per second with GPS and time.</li>
+        <li data-i="s2">A small neural network (YOLO11n) labels the sidewalk: dry, wet, snow, ice or not visible.</li>
+        <li data-i="s3">The risk score adds air temperature (wet at +2 °C or colder is treated as likely black ice), bridges and model confidence. Under 60% confidence a person checks it.</li>
+        <li data-i="s4">The dispatcher sees the map and the Top 10 places to send crews. “Treated” marks give objective proof for contractor control.</li>
+      </ol>
+    </div>
+    <div>
+      <div class="facts">
+        <div><b>95%</b><span data-i="f1">on 65 new Riga street photos the model never saw</span></div>
+        <div><b>700</b><span data-i="f2">winter street photos of Riga collected, about 600 labelled by hand</span></div>
+        <div><b>0 €</b><span data-i="f3">extra vehicles: cameras ride on transport that already drives</span></div>
+      </div>
+      <p class="status" style="margin-top:16px" data-i="honest">Honest note: there are few real Riga ice photos yet. The map points are demo data from Mapillary, not live cameras.</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span data-i="src">Street images: Mapillary, CC BY-SA 4.0 · Training data: Roads dataset (Jeswin Wilson, Roboflow Universe), CC BY 4.0 · Weather: Open-Meteo · Map: © OpenStreetMap contributors</span>
+    <span><a href="https://github.com/emilbzglov-oss/icespotter">GitHub: emilbzglov-oss/icespotter</a> · Team IceSpotter, RTU, Riga</span>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+const T = {
+ en:{tag:"RobotHack 2026 · challenge PCH4 for Rīgas pašvaldība",title:"Hazardous sidewalks of Riga",lead:"Cameras on city vehicles → neural network → a map and a list of where to send crews first.",
+  tLoading:"Loading Riga weather…",tNow:"Riga now (Open-Meteo)",tNone:"Weather unavailable – set it by hand",tHand:"set by hand",tManual:"Set temperature by hand (demo)",
+  topTitle:"Top 10: send crews here first",none:"No hazards right now.",csv:"Download report (CSV)",reset:"Reset “treated”",treat:"Treated",show:"Show",risk:"risk",
+  checkTitle:"Check a sidewalk photo",checkP1:"Upload a photo of a sidewalk. The neural network runs right here in your browser – the photo is not sent anywhere.",checkP2:"If the photo has GPS, the point lands on the map at that place. If not, click the map to place it.",
+  drop:"Choose or drop a photo",roi:"Wide frame from a vehicle: look only at the sidewalk in front (bottom centre)",
+  mLoad:"Loading the model (6 MB) …",mRun:"Classifying…",mErr:"The model could not load. Check the connection and try again.",
+  gpsYes:"GPS found in the photo – added to the map.",gpsNo:"No GPS in the photo. Click the map to place this point.",placed:"Placed on the map.",
+  aboutTitle:"How it works",s1:"A camera on a bus or sidewalk tractor takes 1–3 frames per second with GPS and time.",s2:"A small neural network (YOLO11n) labels the sidewalk: dry, wet, snow, ice or not visible.",
+  s3:"The risk score adds air temperature (wet at +2 °C or colder is treated as likely black ice), bridges and model confidence. Under 60% confidence a person checks it.",
+  s4:"The dispatcher sees the map and the Top 10 places to send crews. “Treated” marks give objective proof for contractor control.",
+  f1:"on 65 new Riga street photos the model never saw",f2:"winter street photos of Riga collected, about 600 labelled by hand",f3:"extra vehicles: cameras ride on transport that already drives",
+  honest:"Honest note: there are few real Riga ice photos yet. The map points are demo data from Mapillary, not live cameras.",
+  src:"Street images: Mapillary, CC BY-SA 4.0 · Training data: Roads dataset (Jeswin Wilson, Roboflow Universe), CC BY 4.0 · Weather: Open-Meteo · Map: © OpenStreetMap contributors",
+  levels:{high:"high",medium:"medium",low:"low",clear:"clear",treated:"treated",hidden:"not visible"},
+  classes:{ice:"ice",snow:"snow",wet:"wet",clear:"dry",not_visible:"not visible"},
+  r:{treated:"treated by crew",not_visible:"sidewalk not visible – needs another frame",camera:"camera: {cls} ({conf})",black_ice:"wet at {t} → likely ice",bridge:"bridge {name} – freezes first",low_conf:"needs a human check"},
+  cols:["id","lat","lon","photo date","class","confidence","risk","level","reasons","treated at"]},
+ lv:{tag:"RobotHack 2026 · izaicinājums PCH4 Rīgas pašvaldībai",title:"Bīstamās Rīgas ietves",lead:"Kameras uz pilsētas transporta → neironu tīkls → karte un saraksts, kur sūtīt brigādes vispirms.",
+  tLoading:"Ielādēju Rīgas laikapstākļus…",tNow:"Rīgā tagad (Open-Meteo)",tNone:"Laikapstākļi nav pieejami – iestati manuāli",tHand:"iestatīts manuāli",tManual:"Iestatīt temperatūru manuāli (demo)",
+  topTitle:"Top 10: kur sūtīt brigādes vispirms",none:"Bīstamu vietu nav.",csv:"Lejupielādēt atskaiti (CSV)",reset:"Atiestatīt “apstrādāts”",treat:"Apstrādāts",show:"Rādīt",risk:"risks",
+  checkTitle:"Pārbaudi ietves foto",checkP1:"Augšupielādē ietves fotogrāfiju. Neironu tīkls darbojas tieši tavā pārlūkā – foto netiek nekur sūtīts.",checkP2:"Ja fotogrāfijā ir GPS, punkts parādās kartē šajā vietā. Ja nav, noklikšķini kartē, lai to novietotu.",
+  drop:"Izvēlies vai ievelc foto",roi:"Plats kadrs no transporta: skatīties tikai uz ietvi priekšā (apakšā centrā)",
+  mLoad:"Ielādēju modeli (6 MB) …",mRun:"Klasificēju…",mErr:"Modeli neizdevās ielādēt. Pārbaudi savienojumu un mēģini vēlreiz.",
+  gpsYes:"Fotogrāfijā atrasts GPS – pievienots kartei.",gpsNo:"Fotogrāfijā nav GPS. Noklikšķini kartē, lai novietotu punktu.",placed:"Novietots kartē.",
+  aboutTitle:"Kā tas darbojas",s1:"Kamera uz autobusa vai ietvju traktora uzņem 1–3 kadrus sekundē ar GPS un laiku.",s2:"Mazs neironu tīkls (YOLO11n) nosaka ietves stāvokli: sauss, slapjš, sniegs, ledus vai nav redzams.",
+  s3:"Riska novērtējums ņem vērā gaisa temperatūru (slapjš pie +2 °C vai aukstāk – iespējams melnais ledus), tiltus un modeļa ticamību. Ja ticamība zem 60%, pārbauda cilvēks.",
+  s4:"Dispečers redz karti un Top 10 vietas, kur sūtīt brigādes. Atzīmes “apstrādāts” dod objektīvu pierādījumu darbuzņēmēja kontrolei.",
+  f1:"uz 65 jaunām Rīgas ielu fotogrāfijām, ko modelis nebija redzējis",f2:"Rīgas ziemas ielu fotogrāfijas savāktas, ap 600 marķētas ar roku",f3:"papildu transporta: kameras brauc ar transportu, kas jau kursē",
+  honest:"Godīgi: īstu Rīgas ledus fotogrāfiju vēl ir maz. Kartes punkti ir demo dati no Mapillary, nevis tiešraides kameras.",
+  src:"Ielu attēli: Mapillary, CC BY-SA 4.0 · Apmācības dati: Roads dataset (Jeswin Wilson, Roboflow Universe), CC BY 4.0 · Laikapstākļi: Open-Meteo · Karte: © OpenStreetMap contributors",
+  levels:{high:"augsts",medium:"vidējs",low:"zems",clear:"tīrs",treated:"apstrādāts",hidden:"nav redzams"},
+  classes:{ice:"ledus",snow:"sniegs",wet:"slapjš",clear:"sauss",not_visible:"nav redzams"},
+  r:{treated:"brigāde apstrādājusi",not_visible:"ietve nav redzama – vajag citu kadru",camera:"kamera: {cls} ({conf})",black_ice:"slapjš pie {t} → iespējams ledus",bridge:"tilts {name} – sasalst pirmais",low_conf:"vajag cilvēka pārbaudi"},
+  cols:["id","lat","lon","foto datums","klase","ticamība","risks","līmenis","iemesli","apstrādāts"]}
+};
+const LV_ORDER=["high","medium","low","clear","treated","hidden"];
+const COLOR={high:"#C3352B",medium:"#DD7A1C",low:"#D9AE12",clear:"#3D8A57",treated:"#2B6B44",hidden:"#8C98A3"};
+const CLASS_RISK={ice:100,snow:60,wet:30,clear:0,not_visible:null};
+const BRIDGES={"Akmens tilts":[56.9466,24.0975],"Vanšu tilts":[56.9565,24.0905],"Salu tilts":[56.9395,24.1295],"Dzelzceļa tilts":[56.9420,24.1080]};
+const CLASSES=["clear","ice","not_visible","snow","wet"];
+
+let lang=(navigator.language||"").startsWith("lv")?"lv":"en";
+let L=T[lang], points=[], airT=null, apiT=null;
+let show=new Set(["high","medium","low","treated"]);
+const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let treated=store.get("ice_treated",{});
+
+const fmtT=t=>(t>0?"+":"")+t.toFixed(1)+"°C";
+function dist(a,b,c,d){const r=6371000,p1=a*Math.PI/180,p2=c*Math.PI/180,dp=p2-p1,dl=(d-b)*Math.PI/180;const x=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;return 2*r*Math.asin(Math.sqrt(x))}
+function bridge(p){for(const [n,[a,b]] of Object.entries(BRIDGES)) if(dist(p.lat,p.lon,a,b)<=150) return n; return null}
+function score(p){
+  if(treated[p.id]) return [0,[["treated",{}]]];
+  const base=CLASS_RISK[p.cls]; if(base==null) return [null,[["not_visible",{}]]];
+  const rs=[["camera",{cls:p.cls,conf:p.conf}]]; let s=base*p.conf;
+  if(p.cls==="wet"&&airT!=null&&airT<=2){s=Math.max(s,90);rs.push(["black_ice",{t:airT}])}
+  const b=bridge(p); if(b){s+=15;rs.push(["bridge",{name:b}])}
+  if(p.conf<0.6) rs.push(["low_conf",{}]);
+  return [Math.round(s),rs];
+}
+function level(p,s){if(treated[p.id])return"treated";if(s==null)return"hidden";if(s>=80)return"high";if(s>=40)return"medium";if(s>0)return"low";return"clear"}
+function rtext(code,pr){let t=L.r[code];return t.replace("{cls}",L.classes[pr.cls]||pr.cls).replace("{conf}",pr.conf!=null?Math.round(pr.conf*100)+"%":"").replace("{t}",pr.t!=null?fmtT(pr.t):"").replace("{name}",pr.name||"")}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+</script>
+<script>
+// Leaflet map
+const mapEl=document.getElementById("map");
+const lmap=window.L.map(mapEl,{scrollWheelZoom:false}).setView([56.9496,24.1052],12);
+window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap contributors"}).addTo(lmap);
+mapEl.addEventListener("click",()=>lmap.scrollWheelZoom.enable(),{once:true});
+const layer=window.L.layerGroup().addTo(lmap);
+const markers={};
+
+function applyLang(){
+  document.documentElement.lang=lang;
+  document.querySelectorAll("[data-i]").forEach(e=>{const k=e.dataset.i; if(L[k]) e.textContent=L[k]});
+  document.querySelectorAll(".lang button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.lang===lang));
+  showTemp(); render();
+}
+document.querySelectorAll(".lang button").forEach(b=>b.onclick=()=>{lang=b.dataset.lang;L=T[lang];store.set("ice_lang",lang);applyLang()});
+
+function showTemp(){
+  const manual=document.getElementById("tManual").checked;
+  document.getElementById("tNow").textContent=airT==null?"–":fmtT(airT);
+  document.getElementById("tSrc").textContent=manual?L.tHand:(apiT==null?L.tNone:L.tNow);
+}
+document.getElementById("tManual").onchange=e=>{const s=document.getElementById("tSlider");s.disabled=!e.target.checked;airT=e.target.checked?+s.value:apiT;showTemp();render()};
+document.getElementById("tSlider").oninput=e=>{airT=+e.target.value;showTemp();render()};
+
+function render(){
+  const counts={}; LV_ORDER.forEach(k=>counts[k]=0);
+  points.forEach(p=>{const [s,rs]=score(p);p.score=s;p.rs=rs;p.level=level(p,s);counts[p.level]++});
+  // level chips
+  const lv=document.getElementById("levels"); lv.innerHTML="";
+  LV_ORDER.forEach(k=>{const b=document.createElement("button");b.type="button";b.className="lv";b.setAttribute("aria-pressed",show.has(k));
+    b.innerHTML=`<span class="n">${counts[k]}</span><span class="t"><i class="dot" style="background:${COLOR[k]}"></i>${esc(L.levels[k])}</span>`;
+    b.onclick=()=>{show.has(k)?show.delete(k):show.add(k);render()}; lv.appendChild(b)});
+  // markers
+  layer.clearLayers();
+  points.forEach(p=>{ if(!show.has(p.level)) return;
+    const m=window.L.circleMarker([p.lat,p.lon],{radius:p.level==="high"?9:7,color:"#fff",weight:1.5,fillColor:COLOR[p.level],fillOpacity:.95});
+    const why=p.rs.map(([c,pr])=>"• "+esc(rtext(c,pr))).join("<br>");
+    m.bindPopup(`<b>${esc(L.levels[p.level])}</b>${p.score!=null?` · ${L.risk} ${p.score}`:""}<br>${why}${p.thumb?`<img src="${p.thumb}" alt="">`:""}<br><small>${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}${p.date?" · "+esc(p.date):""}</small>`);
+    m.addTo(layer); markers[p.id]=m });
+  // top 10
+  const top=points.filter(p=>p.score>0).sort((a,b)=>b.score-a.score).slice(0,10);
+  const ol=document.getElementById("top"); ol.innerHTML="";
+  if(!top.length){ol.innerHTML=`<li style="grid-template-columns:1fr;border-left-color:var(--clear)"><span class="empty">${esc(L.none)}</span></li>`}
+  top.forEach((p,i)=>{const li=document.createElement("li");li.style.setProperty("--c",COLOR[p.level]);
+    const why=p.rs.filter(r=>r[0]!=="camera").map(([c,pr])=>rtext(c,pr)).join("; ");
+    li.innerHTML=`<img src="${p.thumb}" alt="" loading="lazy"><div><div class="sc">${i+1}. ${esc(L.levels[p.level])} · ${L.risk} ${p.score}</div><div class="why">${esc(L.classes[p.cls])} ${Math.round(p.conf*100)}%${why?" · "+esc(why):""}</div>
+      <button type="button" class="goto">${esc(L.show)}</button> <button type="button" class="tr">✅ ${esc(L.treat)}</button></div>`;
+    li.querySelector(".goto").onclick=()=>{lmap.setView([p.lat,p.lon],17);markers[p.id]&&markers[p.id].openPopup();mapEl.scrollIntoView({behavior:"smooth",block:"center"})};
+    li.querySelector(".tr").onclick=()=>{treated[p.id]=new Date().toISOString().slice(0,16).replace("T"," ");store.set("ice_treated",treated);render()};
+    ol.appendChild(li)});
+}
+document.getElementById("reset").onclick=()=>{treated={};store.set("ice_treated",treated);render()};
+document.getElementById("csv").onclick=()=>{
+  const q=v=>`"${String(v??"").replace(/"/g,'""')}"`;
+  const rows=[L.cols.map(q).join(",")].concat(points.map(p=>[p.id,p.lat,p.lon,p.date,L.classes[p.cls],Math.round(p.conf*100)+"%",p.score??"",L.levels[p.level],p.rs.map(([c,pr])=>rtext(c,pr)).join("; "),treated[p.id]||""].map(q).join(",")));
+  const blob=new Blob(["﻿"+rows.join("\n")],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="icespotter_report.csv";a.click();URL.revokeObjectURL(a.href)};
+
+// data + weather
+fetch("points.json").then(r=>r.json()).then(d=>{points=d.map(p=>({...p,thumb:`thumbs/${p.id}.jpg`}));render()});
+fetch("https://api.open-meteo.com/v1/forecast?latitude=56.9496&longitude=24.1052&current=temperature_2m")
+  .then(r=>r.json()).then(j=>{apiT=+j.current.temperature_2m; if(!document.getElementById("tManual").checked) airT=apiT; showTemp(); render()})
+  .catch(()=>{showTemp()});
+
+// ---------- photo check (ONNX in the browser)
+let session=null, pending=null;
+const status=t=>document.getElementById("mStatus").textContent=t;
+async function loadLib(src){return new Promise((ok,no)=>{const s=document.createElement("script");s.src=src;s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
+async function getSession(){
+  if(session) return session;
+  status(L.mLoad);
+  if(!window.ort) await loadLib("https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.min.js");
+  ort.env.wasm.wasmPaths="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/";
+  session=await ort.InferenceSession.create("model/icespotter_v4.onnx",{executionProviders:["wasm"]});
+  return session;
+}
+function toTensor(img,roi){
+  let sx=0,sy=0,sw=img.naturalWidth,sh=img.naturalHeight;
+  if(roi){sx=sw*0.25;sy=sh*0.65;sw=sw*0.5;sh=sh*0.33}
+  // thumbnail to 320 like the server, then resize shortest side to 224 and centre-crop
+  let k=Math.min(1,320/Math.max(sw,sh)); let w=Math.round(sw*k), h=Math.round(sh*k);
+  const c1=document.createElement("canvas");c1.width=w;c1.height=h;c1.getContext("2d").drawImage(img,sx,sy,sw,sh,0,0,w,h);
+  const s=224/Math.min(w,h), W=Math.max(224,Math.round(w*s)), H=Math.max(224,Math.round(h*s));
+  const c2=document.createElement("canvas");c2.width=224;c2.height=224;const x=c2.getContext("2d");x.imageSmoothingQuality="high";
+  x.drawImage(c1,(224-W)/2,(224-H)/2,W,H);
+  const d=x.getImageData(0,0,224,224).data, f=new Float32Array(3*224*224);
+  for(let i=0;i<224*224;i++){f[i]=d[i*4]/255;f[i+50176]=d[i*4+1]/255;f[i+100352]=d[i*4+2]/255}
+  return [new ort.Tensor("float32",f,[1,3,224,224]), c1.toDataURL("image/jpeg",0.7)];
+}
+async function readGPS(file){
+  try{ if(!window.exifr) await loadLib("https://cdn.jsdelivr.net/npm/exifr@7.1.3/dist/lite.umd.js");
+    const g=await exifr.gps(file); return g&&isFinite(g.latitude)?[g.latitude,g.longitude]:null }catch(e){return null}
+}
+async function handle(file){
+  if(!file) return;
+  const url=URL.createObjectURL(file), img=new Image(); img.src=url; await img.decode();
+  let s; try{ s=await getSession() }catch(e){ status(L.mErr); return }
+  status(L.mRun);
+  const [t,thumb]=toTensor(img,document.getElementById("roi").checked);
+  const out=await s.run({[s.inputNames[0]]:t}); const pr=Array.from(out[s.outputNames[0]].data);
+  const best=pr.indexOf(Math.max(...pr)), cls=CLASSES[best], conf=pr[best];
+  const levelColor={ice:COLOR.high,snow:COLOR.medium,wet:COLOR.low,clear:COLOR.clear,not_visible:COLOR.hidden};
+  document.getElementById("result").innerHTML=`<div class="result"><img src="${thumb}" alt=""><div><h3 style="font-size:30px">${esc(L.classes[cls])} · ${Math.round(conf*100)}%</h3><div class="probs">${
+    CLASSES.map((c,i)=>`<div><span>${esc(L.classes[c])}</span><span class="bar"><i style="width:${(pr[i]*100).toFixed(1)}%;background:${levelColor[c]}"></i></span><span>${Math.round(pr[i]*100)}%</span></div>`).join("")}</div></div></div>`;
+  const p={id:"upload-"+Date.now(),cls,conf:+conf.toFixed(3),date:new Date().toISOString().slice(0,10),thumb};
+  const gps=await readGPS(file);
+  if(gps){[p.lat,p.lon]=gps;points.push(p);render();lmap.setView(gps,16);status(L.gpsYes)}
+  else{pending=p;status(L.gpsNo)}
+  URL.revokeObjectURL(url);
+}
+lmap.on("click",e=>{if(!pending)return;pending.lat=e.latlng.lat;pending.lon=e.latlng.lng;points.push(pending);pending=null;render();status(L.placed)});
+const fileIn=document.getElementById("file");
+fileIn.onchange=()=>handle(fileIn.files[0]);
+const drop=document.querySelector(".drop");
+drop.addEventListener("dragover",e=>e.preventDefault());
+drop.addEventListener("drop",e=>{e.preventDefault();handle(e.dataTransfer.files[0])});
+
+lang=store.get("ice_lang",lang); L=T[lang]; applyLang();
+</script>
+</body>
+</html>

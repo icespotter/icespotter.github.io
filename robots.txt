@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://icespotter.github.io/sitemap.xml
