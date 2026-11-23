@@ -69,6 +69,8 @@ header .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:spac
 .top img{width:72px;height:54px;object-fit:cover;border-radius:4px;background:#ccd}
 .top .sc{font:700 20px/1 "Barlow Condensed",sans-serif}
 .top .why{font-size:13px;color:var(--ink2);margin:2px 0 6px}
+.top .tr{border-color:var(--line);color:var(--ink2);background:transparent}
+.top .tr:hover{border-color:var(--ink);color:var(--ink)}
 .top button,.btn{font:600 14px Barlow,sans-serif;border-radius:6px;border:1px solid var(--ink);background:#fff;color:var(--ink);padding:5px 10px;cursor:pointer}
 .btn.primary{background:var(--ink);color:#fff}
 .top .goto{border:0;background:none;color:var(--signal);padding:0;text-decoration:underline}
@@ -98,7 +100,10 @@ footer{padding:28px 0 40px;font-size:14px;color:var(--ink2)}
 footer .wrap{display:grid;gap:6px}
 
 .leaflet-popup-content{font:14px/1.4 Barlow,sans-serif;margin:10px 12px}
-.leaflet-popup-content img{width:220px;border-radius:6px;display:block;margin-top:6px}
+.leaflet-popup-content-wrapper,.leaflet-popup-content{overflow:visible}
+.leaflet-popup-content img{width:220px;border-radius:6px;display:block;margin-top:6px;position:relative;transform-origin:center top;transition:transform .18s ease,box-shadow .18s ease;cursor:zoom-in}
+.leaflet-popup-content img:hover{transform:scale(1.7);z-index:1000;box-shadow:0 10px 30px rgba(23,34,43,.35)}
+@media (hover:none){.leaflet-popup-content img:hover{transform:none;box-shadow:none}}
 
 @media (max-width:900px){
   .hero{grid-template-columns:1fr}
@@ -201,7 +206,7 @@ footer .wrap{display:grid;gap:6px}
 const T = {
  en:{tag:"RobotHack 2026 · challenge PCH4 for Rīgas pašvaldība",title:"Hazardous sidewalks of Riga",lead:"Cameras on city vehicles → neural network → a map and a list of where to send crews first.",
   tLoading:"Loading Riga weather…",tNow:"Riga now (Open-Meteo)",tNone:"Weather unavailable – set it by hand",tHand:"set by hand",tManual:"Set temperature by hand (demo)",
-  topTitle:"Top 10: send crews here first",none:"No hazards right now.",csv:"Download report (CSV)",reset:"Reset “treated”",treat:"Treated",show:"Show",risk:"risk",
+  topTitle:"Top 10: send crews here first",none:"No hazards right now.",csv:"Download report (CSV)",reset:"Reset “treated”",treat:"Mark as treated",show:"Show",risk:"risk",
   checkTitle:"Check a sidewalk photo",checkP1:"Upload a photo of a sidewalk. The neural network runs right here in your browser – the photo is not sent anywhere.",checkP2:"If the photo has GPS, the point lands on the map at that place. If not, click the map to place it.",
   drop:"Choose or drop a photo",roi:"Wide frame from a vehicle: look only at the sidewalk in front (bottom centre)",
   mLoad:"Loading the model (6 MB) …",mRun:"Classifying…",mErr:"The model could not load. Check the connection and try again.",
@@ -218,7 +223,7 @@ const T = {
   cols:["id","lat","lon","photo date","class","confidence","risk","level","reasons","treated at"]},
  lv:{tag:"RobotHack 2026 · izaicinājums PCH4 Rīgas pašvaldībai",title:"Bīstamās Rīgas ietves",lead:"Kameras uz pilsētas transporta → neironu tīkls → karte un saraksts, kur sūtīt brigādes vispirms.",
   tLoading:"Ielādēju Rīgas laikapstākļus…",tNow:"Rīgā tagad (Open-Meteo)",tNone:"Laikapstākļi nav pieejami – iestati manuāli",tHand:"iestatīts manuāli",tManual:"Iestatīt temperatūru manuāli (demo)",
-  topTitle:"Top 10: kur sūtīt brigādes vispirms",none:"Bīstamu vietu nav.",csv:"Lejupielādēt atskaiti (CSV)",reset:"Atiestatīt “apstrādāts”",treat:"Apstrādāts",show:"Rādīt",risk:"risks",
+  topTitle:"Top 10: kur sūtīt brigādes vispirms",none:"Bīstamu vietu nav.",csv:"Lejupielādēt atskaiti (CSV)",reset:"Atiestatīt “apstrādāts”",treat:"Atzīmēt kā apstrādātu",show:"Rādīt",risk:"risks",
   checkTitle:"Pārbaudi ietves foto",checkP1:"Augšupielādē ietves fotogrāfiju. Neironu tīkls darbojas tieši tavā pārlūkā – foto netiek nekur sūtīts.",checkP2:"Ja fotogrāfijā ir GPS, punkts parādās kartē šajā vietā. Ja nav, noklikšķini kartē, lai to novietotu.",
   drop:"Izvēlies vai ievelc foto",roi:"Plats kadrs no transporta: skatīties tikai uz ietvi priekšā (apakšā centrā)",
   mLoad:"Ielādēju modeli (6 MB) …",mRun:"Klasificēju…",mErr:"Modeli neizdevās ielādēt. Pārbaudi savienojumu un mēģini vēlreiz.",
@@ -310,7 +315,7 @@ function render(){
   top.forEach((p,i)=>{const li=document.createElement("li");li.style.setProperty("--c",COLOR[p.level]);
     const why=p.rs.filter(r=>r[0]!=="camera").map(([c,pr])=>rtext(c,pr)).join("; ");
     li.innerHTML=`<img src="${p.thumb}" alt="" loading="lazy"><div><div class="sc">${i+1}. ${esc(L.levels[p.level])} · ${L.risk} ${p.score}</div><div class="why">${esc(L.classes[p.cls])} ${Math.round(p.conf*100)}%${why?" · "+esc(why):""}</div>
-      <button type="button" class="goto">${esc(L.show)}</button> <button type="button" class="tr">✅ ${esc(L.treat)}</button></div>`;
+      <button type="button" class="goto">${esc(L.show)}</button> <button type="button" class="tr">${esc(L.treat)}</button></div>`;
     li.querySelector(".goto").onclick=()=>{lmap.setView([p.lat,p.lon],17);markers[p.id]&&markers[p.id].openPopup();mapEl.scrollIntoView({behavior:"smooth",block:"center"})};
     li.querySelector(".tr").onclick=()=>{treated[p.id]=new Date().toISOString().slice(0,16).replace("T"," ");store.set("ice_treated",treated);render()};
     ol.appendChild(li)});
