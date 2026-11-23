@@ -304,7 +304,10 @@ function render(){
   // markers
   layer.clearLayers();
   points.forEach(p=>{ if(!show.has(p.level)) return;
-    const m=window.L.circleMarker([p.lat,p.lon],{radius:p.level==="high"?9:7,color:"#fff",weight:1.5,fillColor:COLOR[p.level],fillOpacity:.95});
+    const r0=p.level==="high"?9:7;
+    const m=window.L.circleMarker([p.lat,p.lon],{radius:r0,color:"#fff",weight:1.5,fillColor:COLOR[p.level],fillOpacity:.95});
+    m.on("mouseover",()=>{m.setRadius(r0*1.7);m.setStyle({weight:2.5});m.bringToFront()});
+    m.on("mouseout",()=>{m.setRadius(r0);m.setStyle({weight:1.5})});
     const why=p.rs.map(([c,pr])=>"• "+esc(rtext(c,pr))).join("<br>");
     m.bindPopup(`<b>${esc(L.levels[p.level])}</b>${p.score!=null?` · ${L.risk} ${p.score}`:""}<br>${why}${p.thumb?`<img src="${p.thumb}" alt="">`:""}<br><small>${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}${p.date?" · "+esc(p.date):""}</small>`);
     m.addTo(layer); markers[p.id]=m });
