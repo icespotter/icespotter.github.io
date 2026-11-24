@@ -141,11 +141,6 @@ footer .wrap{display:grid;gap:6px}
 
     <div class="temp">
       <div><span class="now" id="tNow">…</span> <span class="status" id="tSrc" data-i="tLoading">Loading Riga weather…</span></div>
-      <div class="wx">
-        <h3 data-i="wxTitle">Weather risk, next 24 h</h3>
-        <div id="wxRows"></div>
-        <p class="status" id="wxWhy"></p>
-      </div>
       <label><input type="checkbox" id="tManual"> <span data-i="tManual">What if the temperature were… (demo)</span></label>
       <input type="range" id="tSlider" min="-15" max="10" step="0.5" value="0" disabled aria-label="Air temperature, °C">
     </div>
@@ -214,7 +209,7 @@ footer .wrap{display:grid;gap:6px}
 <script>
 const T = {
  en:{tag:"RobotHack 2026 · challenge PCH4 for Rīgas pašvaldība",title:"Hazardous sidewalks of Riga",lead:"Cameras on city vehicles → neural network → a map and a list of where to send crews first.",
-  tLoading:"Loading Riga weather…",tNow:"Riga now (Open-Meteo)",tNone:"Weather unavailable – set it by hand",tHand:"set by hand",tManual:"What if the temperature were… (demo)",wxTitle:"Weather risk, next 24 h",wxIce:"Ice / black ice",wxSlush:"Wet snow / slush",wxSnow:"Snow",wxPeak:"peak at {h}",wxNone:"no risk",wxScen:"scenario: {t} all day",
+  tLoading:"Loading Riga weather…",tNow:"Riga now (Open-Meteo)",tNone:"Weather unavailable – set it by hand",tHand:"set by hand",tManual:"What if the temperature were… (demo)",fusedNote:"Photo analysed by the neural network, then adjusted by the Riga weather forecast for the next hours (ice is often invisible on a photo).",wxIce:"Ice / black ice",wxSlush:"Wet snow / slush",wxSnow:"Snow",wxPeak:"peak at {h}",wxNone:"no risk",wxScen:"scenario: {t} all day",
   topTitle:"Top 10: send crews here first",none:"No hazards right now.",csv:"Download report (CSV)",reset:"Reset “treated”",treat:"Mark as treated",show:"Show",risk:"risk",
   checkTitle:"Check a sidewalk photo",checkP1:"Upload a photo of a sidewalk. The neural network runs right here in your browser – the photo is not sent anywhere.",checkP2:"If the photo has GPS, the point lands on the map at that place. If not, click the map to place it.",
   drop:"Choose or drop a photo",roi:"Wide frame from a vehicle: look only at the sidewalk in front (bottom centre)",
@@ -231,7 +226,7 @@ const T = {
   r:{treated:"treated by crew",not_visible:"sidewalk not visible – needs another frame",camera:"camera: {cls} ({conf})",black_ice:"wet at {t} → likely ice",bridge:"bridge {name} – freezes first",low_conf:"needs a human check",wx_ice:"weather: icing likely ({v}) → ice risk raised",wx_snow:"weather: fresh snow expected ({v})"},
   cols:["id","lat","lon","photo date","class","confidence","risk","level","reasons","treated at"]},
  lv:{tag:"RobotHack 2026 · izaicinājums PCH4 Rīgas pašvaldībai",title:"Bīstamās Rīgas ietves",lead:"Kameras uz pilsētas transporta → neironu tīkls → karte un saraksts, kur sūtīt brigādes vispirms.",
-  tLoading:"Ielādēju Rīgas laikapstākļus…",tNow:"Rīgā tagad (Open-Meteo)",tNone:"Laikapstākļi nav pieejami – iestati manuāli",tHand:"iestatīts manuāli",tManual:"Ja temperatūra būtu… (demo)",wxTitle:"Laikapstākļu risks, nākamās 24 h",wxIce:"Apledojums / melnais ledus",wxSlush:"Slapjš sniegs / šķīdonis",wxSnow:"Sniegs",wxPeak:"maksimums {h}",wxNone:"nav riska",wxScen:"scenārijs: {t} visu dienu",
+  tLoading:"Ielādēju Rīgas laikapstākļus…",tNow:"Rīgā tagad (Open-Meteo)",tNone:"Laikapstākļi nav pieejami – iestati manuāli",tHand:"iestatīts manuāli",tManual:"Ja temperatūra būtu… (demo)",fusedNote:"Foto analizē neironu tīkls, pēc tam rezultātu precizē Rīgas laikapstākļu prognoze nākamajām stundām (ledus fotogrāfijā bieži nav redzams).",wxIce:"Apledojums / melnais ledus",wxSlush:"Slapjš sniegs / šķīdonis",wxSnow:"Sniegs",wxPeak:"maksimums {h}",wxNone:"nav riska",wxScen:"scenārijs: {t} visu dienu",
   topTitle:"Top 10: kur sūtīt brigādes vispirms",none:"Bīstamu vietu nav.",csv:"Lejupielādēt atskaiti (CSV)",reset:"Atiestatīt “apstrādāts”",treat:"Atzīmēt kā apstrādātu",show:"Rādīt",risk:"risks",
   checkTitle:"Pārbaudi ietves foto",checkP1:"Augšupielādē ietves fotogrāfiju. Neironu tīkls darbojas tieši tavā pārlūkā – foto netiek nekur sūtīts.",checkP2:"Ja fotogrāfijā ir GPS, punkts parādās kartē šajā vietā. Ja nav, noklikšķini kartē, lai to novietotu.",
   drop:"Izvēlies vai ievelc foto",roi:"Plats kadrs no transporta: skatīties tikai uz ietvi priekšā (apakšā centrā)",
@@ -294,7 +289,7 @@ function computeWeather(){
   }
   W=out;
 }
-function renderWeather(){
+function renderWeather(){ return;
   const rows=[["ice",L.wxIce,COLOR.high],["slush",L.wxSlush,COLOR.medium],["snow",L.wxSnow,"#6E8CA8"]];
   document.getElementById("wxRows").innerHTML=rows.map(([k,lab,col])=>{const v=Math.round((W[k]||0)*100);
     return `<div class="wxr"><span>${esc(lab)}</span><span class="bar"><i style="width:${v}%;background:${col}"></i></span><b>${v}%</b>
@@ -302,21 +297,24 @@ function renderWeather(){
   const manual=document.getElementById("tManual").checked;
   document.getElementById("wxWhy").textContent=manual&&airT!=null?L.wxScen.replace("{t}",fmtT(airT)):"";
 }
-// photo + weather → one risk score
-function score(p){
-  if(treated[p.id]) return [0,[["treated",{}]]];
-  if(p.cls==="not_visible") return [null,[["not_visible",{}]]];
-  const P=p.p||{[p.cls]:p.conf}, g=k=>P[k]||0;
-  const T=airT;
+// Step 2 of the classifier: the network's photo probabilities are adjusted by the weather
+// (black ice is invisible on a photo; the forecast says where a surface is about to freeze).
+function fuse(P){
+  const g=k=>P[k]||0, T=airT;
   const iceGivenWet=Math.max(W.iceNow, T==null?0:(T<=0?0.9:(T<=2?0.5:0)));
   const iw=g("wet")*iceGivenWet, ic=g("clear")*W.iceNow*0.25;
   const sn=W.snowNow*0.5, sc=(g("clear")-ic)*sn, sw=(g("wet")-iw)*sn;
-  const q={ice:g("ice")+iw+ic, snow:g("snow")+sc+sw, wet:g("wet")-iw-sw, clear:g("clear")-ic-sc};
+  return {q:{ice:g("ice")+iw+ic, snow:g("snow")+sc+sw, wet:g("wet")-iw-sw, clear:g("clear")-ic-sc, not_visible:g("not_visible")}, iw, ic, add:sc+sw};
+}
+function score(p){
+  if(treated[p.id]) return [0,[["treated",{}]]];
+  if(p.cls==="not_visible") return [null,[["not_visible",{}]]];
+  const T=airT, f=fuse(p.p||{[p.cls]:p.conf}), q=f.q;
   let s=100*q.ice+60*q.snow+30*q.wet;
   const rs=[["camera",{cls:p.cls,conf:p.conf}]];
-  if(iw>0.05&&T!=null&&T<=2&&W.iceNow<0.3) rs.push(["black_ice",{t:T}]);
-  else if(iw+ic>0.05) rs.push(["wx_ice",{v:Math.round(W.iceNow*100)+"%"}]);
-  if(sc+sw>0.05) rs.push(["wx_snow",{v:Math.round(W.snowNow*100)+"%"}]);
+  if(f.iw>0.05&&T!=null&&T<=2&&W.iceNow<0.3) rs.push(["black_ice",{t:T}]);
+  else if(f.iw+f.ic>0.05) rs.push(["wx_ice",{v:Math.round(W.iceNow*100)+"%"}]);
+  if(f.add>0.05) rs.push(["wx_snow",{v:Math.round(W.snowNow*100)+"%"}]);
   const b=bridge(p); if(b){s+=15*Math.max(W.iceNow,q.ice,q.wet>0.3?0.5:0);rs.push(["bridge",{name:b}])}
   if(p.conf<0.6) rs.push(["low_conf",{}]);
   return [Math.round(s),rs];
@@ -352,7 +350,7 @@ document.getElementById("tManual").onchange=e=>{const s=document.getElementById(
 document.getElementById("tSlider").oninput=e=>{airT=+e.target.value;showTemp();render()};
 
 function render(){
-  computeWeather(); renderWeather();
+  computeWeather();
   const counts={}; LV_ORDER.forEach(k=>counts[k]=0);
   points.forEach(p=>{const [s,rs]=score(p);p.score=s;p.rs=rs;p.level=level(p,s);counts[p.level]++});
   // level chips
@@ -436,11 +434,15 @@ async function handle(file){
   status(L.mRun);
   const [t,thumb]=toTensor(img,document.getElementById("roi").checked);
   const out=await s.run({[s.inputNames[0]]:t}); const pr=Array.from(out[s.outputNames[0]].data);
-  const best=pr.indexOf(Math.max(...pr)), cls=CLASSES[best], conf=pr[best];
+  computeWeather();
+  const raw=Object.fromEntries(CLASSES.map((c,i)=>[c,pr[i]]));
+  const fq=fuse(raw).q, fused=CLASSES.map(c=>Math.max(0,fq[c]||0));
+  const best=fused.indexOf(Math.max(...fused)), cls=CLASSES[best], conf=fused[best];
   const levelColor={ice:COLOR.high,snow:COLOR.medium,wet:COLOR.low,clear:COLOR.clear,not_visible:COLOR.hidden};
   document.getElementById("result").innerHTML=`<div class="result"><img src="${thumb}" alt=""><div><h3 style="font-size:30px">${esc(L.classes[cls])} · ${Math.round(conf*100)}%</h3><div class="probs">${
-    CLASSES.map((c,i)=>`<div><span>${esc(L.classes[c])}</span><span class="bar"><i style="width:${(pr[i]*100).toFixed(1)}%;background:${levelColor[c]}"></i></span><span>${Math.round(pr[i]*100)}%</span></div>`).join("")}</div></div></div>`;
-  const p={id:"upload-"+Date.now(),cls,conf:+conf.toFixed(3),p:Object.fromEntries(CLASSES.map((c,i)=>[c,pr[i]])),date:new Date().toISOString().slice(0,10),thumb};
+    CLASSES.map((c,i)=>`<div><span>${esc(L.classes[c])}</span><span class="bar"><i style="width:${(fused[i]*100).toFixed(1)}%;background:${levelColor[c]}"></i></span><span>${Math.round(fused[i]*100)}%</span></div>`).join("")}</div>
+    <p class="status" style="margin-top:8px">${esc(L.fusedNote)}</p></div></div>`;
+  const p={id:"upload-"+Date.now(),cls,conf:+conf.toFixed(3),p:raw,date:new Date().toISOString().slice(0,10),thumb};
   const gps=await readGPS(file);
   if(gps){[p.lat,p.lon]=gps;points.push(p);render();lmap.setView(gps,16);status(L.gpsYes)}
   else{pending=p;status(L.gpsNo)}
