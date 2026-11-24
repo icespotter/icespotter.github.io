@@ -59,7 +59,7 @@ header .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:spac
 .wxr{display:grid;grid-template-columns:118px 1fr 40px;gap:8px;align-items:center;font-size:14px;margin:4px 0}
 .wxr .bar{height:9px}
 .wxr small{grid-column:2/4;color:var(--ink2);margin-top:-4px;font-size:12px}
-.levels{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.levels{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .lv{all:unset;cursor:pointer;display:grid;gap:2px;padding:8px 10px;border-radius:8px;background:#fff;border:1px solid var(--line)}
 .lv:focus-visible{outline:3px solid var(--signal)}
 .lv[aria-pressed=false]{opacity:.45}
@@ -221,9 +221,9 @@ const T = {
   f1:"on 65 new Riga street photos the model never saw",f2:"winter street photos of Riga collected, about 600 labelled by hand",f3:"extra vehicles: cameras ride on transport that already drives",
   honest:"Honest note: there are few real Riga ice photos yet. The map points are demo data from Mapillary, not live cameras.",
   src:"Street images: Mapillary, CC BY-SA 4.0 · Training data: Roads dataset (Jeswin Wilson, Roboflow Universe), CC BY 4.0 · Weather: Open-Meteo · Map: © OpenStreetMap contributors",
-  levels:{high:"high",medium:"medium",low:"low",clear:"clear",treated:"treated",hidden:"not visible"},
-  classes:{ice:"ice",snow:"snow",wet:"wet",clear:"dry",not_visible:"not visible"},
-  r:{treated:"treated by crew",not_visible:"sidewalk not visible – needs another frame",camera:"camera: {cls} ({conf})",black_ice:"wet at {t} → likely ice",bridge:"bridge {name} – freezes first",low_conf:"needs a human check",wx_ice:"weather: icing likely ({v}) → ice risk raised",wx_snow:"weather: fresh snow expected ({v})"},
+  levels:{high:"high",blocked:"blocked",medium:"medium",low:"low",clear:"clear",treated:"treated",hidden:"not visible"},
+  classes:{ice:"ice",snow:"snow",wet:"wet",clear:"dry",not_visible:"not visible",blocked:"blocked"},
+  r:{treated:"treated by crew",not_visible:"sidewalk not visible – needs another frame",camera:"camera: {cls} ({conf})",black_ice:"wet at {t} → likely ice",bridge:"bridge {name} – freezes first",low_conf:"needs a human check",blocked:"sidewalk blocked (snowbank, parked car, fence) – people walk on the road",wx_ice:"weather: icing likely ({v}) → ice risk raised",wx_snow:"weather: fresh snow expected ({v})"},
   cols:["id","lat","lon","photo date","class","confidence","risk","level","reasons","treated at"]},
  lv:{tag:"RobotHack 2026 · izaicinājums PCH4 Rīgas pašvaldībai",title:"Bīstamās Rīgas ietves",lead:"Kameras uz pilsētas transporta → neironu tīkls → karte un saraksts, kur sūtīt brigādes vispirms.",
   tLoading:"Ielādēju Rīgas laikapstākļus…",tNow:"Rīgā tagad (Open-Meteo)",tNone:"Laikapstākļi nav pieejami – iestati manuāli",tHand:"iestatīts manuāli",tManual:"Ja temperatūra būtu… (demo)",fusedNote:"Foto analizē neironu tīkls, pēc tam rezultātu precizē Rīgas laikapstākļu prognoze nākamajām stundām (ledus fotogrāfijā bieži nav redzams).",wxIce:"Apledojums / melnais ledus",wxSlush:"Slapjš sniegs / šķīdonis",wxSnow:"Sniegs",wxPeak:"maksimums {h}",wxNone:"nav riska",wxScen:"scenārijs: {t} visu dienu",
@@ -238,20 +238,20 @@ const T = {
   f1:"uz 65 jaunām Rīgas ielu fotogrāfijām, ko modelis nebija redzējis",f2:"Rīgas ziemas ielu fotogrāfijas savāktas, ap 600 marķētas ar roku",f3:"papildu transporta: kameras brauc ar transportu, kas jau kursē",
   honest:"Godīgi: īstu Rīgas ledus fotogrāfiju vēl ir maz. Kartes punkti ir demo dati no Mapillary, nevis tiešraides kameras.",
   src:"Ielu attēli: Mapillary, CC BY-SA 4.0 · Apmācības dati: Roads dataset (Jeswin Wilson, Roboflow Universe), CC BY 4.0 · Laikapstākļi: Open-Meteo · Karte: © OpenStreetMap contributors",
-  levels:{high:"augsts",medium:"vidējs",low:"zems",clear:"tīrs",treated:"apstrādāts",hidden:"nav redzams"},
-  classes:{ice:"ledus",snow:"sniegs",wet:"slapjš",clear:"sauss",not_visible:"nav redzams"},
-  r:{treated:"brigāde apstrādājusi",not_visible:"ietve nav redzama – vajag citu kadru",camera:"kamera: {cls} ({conf})",black_ice:"slapjš pie {t} → iespējams ledus",bridge:"tilts {name} – sasalst pirmais",low_conf:"vajag cilvēka pārbaudi",wx_ice:"laikapstākļi: iespējams apledojums ({v}) → ledus risks paaugstināts",wx_snow:"laikapstākļi: gaidāms svaigs sniegs ({v})"},
+  levels:{high:"augsts",blocked:"aizšķērsots",medium:"vidējs",low:"zems",clear:"tīrs",treated:"apstrādāts",hidden:"nav redzams"},
+  classes:{ice:"ledus",snow:"sniegs",wet:"slapjš",clear:"sauss",not_visible:"nav redzams",blocked:"aizšķērsots"},
+  r:{treated:"brigāde apstrādājusi",not_visible:"ietve nav redzama – vajag citu kadru",camera:"kamera: {cls} ({conf})",black_ice:"slapjš pie {t} → iespējams ledus",bridge:"tilts {name} – sasalst pirmais",low_conf:"vajag cilvēka pārbaudi",blocked:"ietve aizšķērsota (sniega kaudze, auto, žogs) – gājēji iet pa brauktuvi",wx_ice:"laikapstākļi: iespējams apledojums ({v}) → ledus risks paaugstināts",wx_snow:"laikapstākļi: gaidāms svaigs sniegs ({v})"},
   cols:["id","lat","lon","foto datums","klase","ticamība","risks","līmenis","iemesli","apstrādāts"]}
 };
-const LV_ORDER=["high","medium","low","clear","treated","hidden"];
-const COLOR={high:"#C3352B",medium:"#DD7A1C",low:"#D9AE12",clear:"#3D8A57",treated:"#2B6B44",hidden:"#8C98A3"};
-const CLASS_RISK={ice:100,snow:60,wet:30,clear:0,not_visible:null};
+const LV_ORDER=["high","blocked","medium","low","clear","treated","hidden"];
+const COLOR={high:"#C3352B",blocked:"#7A4FA3",medium:"#DD7A1C",low:"#D9AE12",clear:"#3D8A57",treated:"#2B6B44",hidden:"#8C98A3"};
+const CLASS_RISK={ice:100,blocked:80,snow:60,wet:30,clear:0,not_visible:null};
 const BRIDGES={"Akmens tilts":[56.9466,24.0975],"Vanšu tilts":[56.9565,24.0905],"Salu tilts":[56.9395,24.1295],"Dzelzceļa tilts":[56.9420,24.1080]};
-const CLASSES=["clear","ice","not_visible","snow","wet"];
+let CLASSES=["clear","ice","not_visible","snow","wet"];   // replaced by model/classes.json
 
 let lang=(navigator.language||"").startsWith("lv")?"lv":"en";
 let L=T[lang], points=[], airT=null, apiT=null;
-let show=new Set(["high","medium","low","treated"]);
+let show=new Set(["high","blocked","medium","low","treated"]);
 const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 let treated=store.get("ice_treated",{});
 
@@ -309,6 +309,7 @@ function fuse(P){
 function score(p){
   if(treated[p.id]) return [0,[["treated",{}]]];
   if(p.cls==="not_visible") return [null,[["not_visible",{}]]];
+  if(p.cls==="blocked") return [80,[["camera",{cls:p.cls,conf:p.conf}],["blocked",{}]]];
   const T=airT, f=fuse(p.p||{[p.cls]:p.conf}), q=f.q;
   let s=100*q.ice+60*q.snow+30*q.wet;
   const rs=[["camera",{cls:p.cls,conf:p.conf}]];
@@ -319,7 +320,7 @@ function score(p){
   if(p.conf<0.6) rs.push(["low_conf",{}]);
   return [Math.round(s),rs];
 }
-function level(p,s){if(treated[p.id])return"treated";if(s==null)return"hidden";if(s>=80)return"high";if(s>=40)return"medium";if(s>=10)return"low";return"clear"}
+function level(p,s){if(treated[p.id])return"treated";if(s==null)return"hidden";if(p.cls==="blocked")return"blocked";if(s>=80)return"high";if(s>=40)return"medium";if(s>=10)return"low";return"clear"}
 function rtext(code,pr){let t=L.r[code].replace("{v}",pr.v||"");return t.replace("{cls}",L.classes[pr.cls]||pr.cls).replace("{conf}",pr.conf!=null?Math.round(pr.conf*100)+"%":"").replace("{t}",pr.t!=null?fmtT(pr.t):"").replace("{name}",pr.name||"")}
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
@@ -407,6 +408,7 @@ async function getSession(){
   status(L.mLoad);
   if(!window.ort) await loadLib("https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.min.js");
   ort.env.wasm.wasmPaths="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/";
+  try{CLASSES=await fetch("model/classes.json").then(r=>r.json())}catch(e){}
   session=await ort.InferenceSession.create("model/icespotter_v4.onnx",{executionProviders:["wasm"]});
   return session;
 }
@@ -436,9 +438,10 @@ async function handle(file){
   const out=await s.run({[s.inputNames[0]]:t}); const pr=Array.from(out[s.outputNames[0]].data);
   computeWeather();
   const raw=Object.fromEntries(CLASSES.map((c,i)=>[c,pr[i]]));
-  const fq=fuse(raw).q, fused=CLASSES.map(c=>Math.max(0,fq[c]||0));
+  const photoTop=CLASSES[pr.indexOf(Math.max(...pr))];
+  const fq=(photoTop==="blocked"||photoTop==="not_visible")?raw:{...raw,...fuse(raw).q}, fused=CLASSES.map(c=>Math.max(0,fq[c]||0));
   const best=fused.indexOf(Math.max(...fused)), cls=CLASSES[best], conf=fused[best];
-  const levelColor={ice:COLOR.high,snow:COLOR.medium,wet:COLOR.low,clear:COLOR.clear,not_visible:COLOR.hidden};
+  const levelColor={ice:COLOR.high,blocked:COLOR.blocked,snow:COLOR.medium,wet:COLOR.low,clear:COLOR.clear,not_visible:COLOR.hidden};
   document.getElementById("result").innerHTML=`<div class="result"><img src="${thumb}" alt=""><div><h3 style="font-size:30px">${esc(L.classes[cls])} · ${Math.round(conf*100)}%</h3><div class="probs">${
     CLASSES.map((c,i)=>`<div><span>${esc(L.classes[c])}</span><span class="bar"><i style="width:${(fused[i]*100).toFixed(1)}%;background:${levelColor[c]}"></i></span><span>${Math.round(fused[i]*100)}%</span></div>`).join("")}</div>
     <p class="status" style="margin-top:8px">${esc(L.fusedNote)}</p></div></div>`;
