@@ -164,7 +164,7 @@ footer .wrap{display:grid;gap:6px}
     <div class="prose">
       <h2 data-i="checkTitle">Check a sidewalk photo</h2>
       <p data-i="checkP1">Upload a photo of a sidewalk. The neural network runs right here in your browser – the photo is not sent anywhere.</p>
-      <p data-i="checkP2">If the photo has GPS, the point lands on the map at that place. If not, click the map to place it.</p>
+      <p data-i="checkP2">Only snow, wet snow and ice in the middle of the sidewalk go on the crews’ map. If the photo has GPS, the point lands at that place; if not, click the map to place it.</p>
     </div>
     <div class="check">
       <label class="drop"><input type="file" id="file" accept="image/*"><span data-i="drop">Choose or drop a photo</span></label>
@@ -183,7 +183,7 @@ footer .wrap{display:grid;gap:6px}
         <li data-i="s1">A camera on a bus or sidewalk tractor takes 1–3 frames per second with GPS and time.</li>
         <li data-i="s2">A small neural network (YOLO11n) labels the sidewalk: dry, wet, snow, ice or not visible.</li>
         <li data-i="s3">The risk score joins the photo with the weather for the next hours: temperature, dew point and precipitation give the chance of ice, wet snow and snow. Black ice is invisible on a photo, so the forecast raises the risk where a wet or dry-looking surface is about to freeze. Bridges and model confidence count too; under 60% a person checks it.</li>
-        <li data-i="s4">The dispatcher sees the map and the Top 10 places to send crews. “Treated” marks give objective proof for contractor control.</li>
+        <li data-i="s4">Crews see only what they must clean: snow, wet snow and ice in the walking line, plus the Top 10 places to go first. Everything else stays in the system report. “Treated” marks give objective proof for contractor control.</li>
       </ol>
     </div>
     <div>
@@ -210,48 +210,50 @@ footer .wrap{display:grid;gap:6px}
 const T = {
  en:{tag:"RobotHack 2026 · challenge PCH4 for Rīgas pašvaldība",title:"Hazardous sidewalks of Riga",lead:"Cameras on city vehicles → neural network → a map and a list of where to send crews first.",
   tLoading:"Loading Riga weather…",tNow:"Riga now (Open-Meteo)",tNone:"Weather unavailable – set it by hand",tHand:"set by hand",tManual:"What if the temperature were… (demo)",fusedNote:"Photo analysed by the neural network, then adjusted by the Riga weather forecast for the next hours (ice is often invisible on a photo).",wxIce:"Ice / black ice",wxSlush:"Wet snow / slush",wxSnow:"Snow",wxPeak:"peak at {h}",wxNone:"no risk",wxScen:"scenario: {t} all day",
-  topTitle:"Top 10: send crews here first",none:"No hazards right now.",csv:"Download report (CSV)",reset:"Reset “treated”",treat:"Mark as treated",show:"Show",risk:"risk",
-  checkTitle:"Check a sidewalk photo",checkP1:"Upload a photo of a sidewalk. The neural network runs right here in your browser – the photo is not sent anywhere.",checkP2:"If the photo has GPS, the point lands on the map at that place. If not, click the map to place it.",
+  topTitle:"Top 10: send crews here first",none:"No snow or ice on the sidewalks right now.",offMap:"Not a cleaning job – saved in the system, not shown on the crews’ map.",edge:"Snow/ice only at the edge – the walking line is clear, not shown on the map.",csv:"Download report (CSV)",reset:"Reset “treated”",treat:"Mark as treated",show:"Show",risk:"risk",
+  checkTitle:"Check a sidewalk photo",checkP1:"Upload a photo of a sidewalk. The neural network runs right here in your browser – the photo is not sent anywhere.",checkP2:"Only snow, wet snow and ice in the middle of the sidewalk go on the crews’ map. If the photo has GPS, the point lands at that place; if not, click the map to place it.",
   drop:"Choose or drop a photo",roi:"Wide frame from a vehicle: look only at the sidewalk in front (bottom centre)",
   mLoad:"Loading the model (6 MB) …",mRun:"Classifying…",mErr:"The model could not load. Check the connection and try again.",
   gpsYes:"GPS found in the photo – added to the map.",gpsNo:"No GPS in the photo. Click the map to place this point.",placed:"Placed on the map.",
   aboutTitle:"How it works",s1:"A camera on a bus or sidewalk tractor takes 1–3 frames per second with GPS and time.",s2:"A small neural network (YOLO11n) labels the sidewalk: dry, wet, snow, ice or not visible.",
   s3:"The risk score joins the photo with the weather for the next hours: temperature, dew point and precipitation give the chance of ice, wet snow and snow. Black ice is invisible on a photo, so the forecast raises the risk where a wet or dry-looking surface is about to freeze. Bridges and model confidence count too; under 60% a person checks it.",
-  s4:"The dispatcher sees the map and the Top 10 places to send crews. “Treated” marks give objective proof for contractor control.",
+  s4:"Crews see only what they must clean: snow, wet snow and ice in the walking line, plus the Top 10 places to go first. Everything else stays in the system report. “Treated” marks give objective proof for contractor control.",
   f1:"accuracy on 582 hand-labelled Riga photos (4-fold cross-validation)",f2:"winter street photos of Riga collected, about 600 labelled by hand",f3:"extra vehicles: cameras ride on transport that already drives",
   honest:"Honest note: there are few real Riga ice photos yet. The map points are demo data from Mapillary, not live cameras.",
   src:"Street images: Mapillary, CC BY-SA 4.0 · Training data: Roads dataset (Jeswin Wilson, Roboflow Universe), CC BY 4.0 · Weather: Open-Meteo · Map: © OpenStreetMap contributors",
-  levels:{high:"high",blocked:"blocked",medium:"medium",low:"low",clear:"clear",treated:"treated",hidden:"not visible"},
+  levels:{ice:"ice",slush:"wet snow",snow:"snow",treated:"treated",none:"no action needed"},
   classes:{ice:"ice",snow:"snow",wet:"wet",clear:"dry",not_visible:"not visible",blocked:"blocked"},
   r:{treated:"treated by crew",not_visible:"sidewalk not visible – needs another frame",camera:"camera: {cls} ({conf})",black_ice:"wet at {t} → likely ice",bridge:"bridge {name} – freezes first",low_conf:"needs a human check",blocked:"sidewalk blocked (snowbank, parked car, fence) – people walk on the road",wx_ice:"weather: icing likely ({v}) → ice risk raised",wx_snow:"weather: fresh snow expected ({v})"},
   cols:["id","lat","lon","photo date","class","confidence","risk","level","reasons","treated at"]},
  lv:{tag:"RobotHack 2026 · izaicinājums PCH4 Rīgas pašvaldībai",title:"Bīstamās Rīgas ietves",lead:"Kameras uz pilsētas transporta → neironu tīkls → karte un saraksts, kur sūtīt brigādes vispirms.",
   tLoading:"Ielādēju Rīgas laikapstākļus…",tNow:"Rīgā tagad (Open-Meteo)",tNone:"Laikapstākļi nav pieejami – iestati manuāli",tHand:"iestatīts manuāli",tManual:"Ja temperatūra būtu… (demo)",fusedNote:"Foto analizē neironu tīkls, pēc tam rezultātu precizē Rīgas laikapstākļu prognoze nākamajām stundām (ledus fotogrāfijā bieži nav redzams).",wxIce:"Apledojums / melnais ledus",wxSlush:"Slapjš sniegs / šķīdonis",wxSnow:"Sniegs",wxPeak:"maksimums {h}",wxNone:"nav riska",wxScen:"scenārijs: {t} visu dienu",
-  topTitle:"Top 10: kur sūtīt brigādes vispirms",none:"Bīstamu vietu nav.",csv:"Lejupielādēt atskaiti (CSV)",reset:"Atiestatīt “apstrādāts”",treat:"Atzīmēt kā apstrādātu",show:"Rādīt",risk:"risks",
-  checkTitle:"Pārbaudi ietves foto",checkP1:"Augšupielādē ietves fotogrāfiju. Neironu tīkls darbojas tieši tavā pārlūkā – foto netiek nekur sūtīts.",checkP2:"Ja fotogrāfijā ir GPS, punkts parādās kartē šajā vietā. Ja nav, noklikšķini kartē, lai to novietotu.",
+  topTitle:"Top 10: kur sūtīt brigādes vispirms",none:"Pašlaik uz ietvēm nav sniega vai ledus.",offMap:"Nav tīrīšanas darbs – saglabāts sistēmā, brigāžu kartē netiek rādīts.",edge:"Sniegs/ledus tikai malā – gājēju josla tīra, kartē netiek rādīts.",csv:"Lejupielādēt atskaiti (CSV)",reset:"Atiestatīt “apstrādāts”",treat:"Atzīmēt kā apstrādātu",show:"Rādīt",risk:"risks",
+  checkTitle:"Pārbaudi ietves foto",checkP1:"Augšupielādē ietves fotogrāfiju. Neironu tīkls darbojas tieši tavā pārlūkā – foto netiek nekur sūtīts.",checkP2:"Brigāžu kartē nonāk tikai sniegs, slapjš sniegs un ledus ietves vidū. Ja fotogrāfijā ir GPS, punkts parādās šajā vietā; ja nav, noklikšķini kartē, lai to novietotu.",
   drop:"Izvēlies vai ievelc foto",roi:"Plats kadrs no transporta: skatīties tikai uz ietvi priekšā (apakšā centrā)",
   mLoad:"Ielādēju modeli (6 MB) …",mRun:"Klasificēju…",mErr:"Modeli neizdevās ielādēt. Pārbaudi savienojumu un mēģini vēlreiz.",
   gpsYes:"Fotogrāfijā atrasts GPS – pievienots kartei.",gpsNo:"Fotogrāfijā nav GPS. Noklikšķini kartē, lai novietotu punktu.",placed:"Novietots kartē.",
   aboutTitle:"Kā tas darbojas",s1:"Kamera uz autobusa vai ietvju traktora uzņem 1–3 kadrus sekundē ar GPS un laiku.",s2:"Mazs neironu tīkls (YOLO11n) nosaka ietves stāvokli: sauss, slapjš, sniegs, ledus vai nav redzams.",
   s3:"Riska novērtējums apvieno foto ar laikapstākļiem nākamajām stundām: temperatūra, rasas punkts un nokrišņi dod apledojuma, slapja sniega un sniega iespējamību. Melnais ledus fotogrāfijā nav redzams, tāpēc prognoze paaugstina risku tur, kur slapja vai sausa virsma drīz sasals. Tiek ņemti vērā arī tilti un modeļa ticamība; zem 60% pārbauda cilvēks.",
-  s4:"Dispečers redz karti un Top 10 vietas, kur sūtīt brigādes. Atzīmes “apstrādāts” dod objektīvu pierādījumu darbuzņēmēja kontrolei.",
+  s4:"Brigādes redz tikai to, kas jātīra: sniegu, slapju sniegu un ledu gājēju joslā, un Top 10 vietas, kur doties vispirms. Viss pārējais paliek sistēmas atskaitē. Atzīmes “apstrādāts” dod objektīvu pierādījumu darbuzņēmēja kontrolei.",
   f1:"precizitāte uz 582 ar roku marķētām Rīgas fotogrāfijām (4-kārtīga šķērspārbaude)",f2:"Rīgas ziemas ielu fotogrāfijas savāktas, ap 600 marķētas ar roku",f3:"papildu transporta: kameras brauc ar transportu, kas jau kursē",
   honest:"Godīgi: īstu Rīgas ledus fotogrāfiju vēl ir maz. Kartes punkti ir demo dati no Mapillary, nevis tiešraides kameras.",
   src:"Ielu attēli: Mapillary, CC BY-SA 4.0 · Apmācības dati: Roads dataset (Jeswin Wilson, Roboflow Universe), CC BY 4.0 · Laikapstākļi: Open-Meteo · Karte: © OpenStreetMap contributors",
-  levels:{high:"augsts",blocked:"aizšķērsots",medium:"vidējs",low:"zems",clear:"tīrs",treated:"apstrādāts",hidden:"nav redzams"},
+  levels:{ice:"ledus",slush:"slapjš sniegs",snow:"sniegs",treated:"apstrādāts",none:"nav jārīkojas"},
   classes:{ice:"ledus",snow:"sniegs",wet:"slapjš",clear:"sauss",not_visible:"nav redzams",blocked:"aizšķērsots"},
   r:{treated:"brigāde apstrādājusi",not_visible:"ietve nav redzama – vajag citu kadru",camera:"kamera: {cls} ({conf})",black_ice:"slapjš pie {t} → iespējams ledus",bridge:"tilts {name} – sasalst pirmais",low_conf:"vajag cilvēka pārbaudi",blocked:"ietve aizšķērsota (sniega kaudze, auto, žogs) – gājēji iet pa brauktuvi",wx_ice:"laikapstākļi: iespējams apledojums ({v}) → ledus risks paaugstināts",wx_snow:"laikapstākļi: gaidāms svaigs sniegs ({v})"},
   cols:["id","lat","lon","foto datums","klase","ticamība","risks","līmenis","iemesli","apstrādāts"]}
 };
-const LV_ORDER=["high","blocked","medium","low","clear","treated","hidden"];
-const COLOR={high:"#C3352B",blocked:"#7A4FA3",medium:"#DD7A1C",low:"#D9AE12",clear:"#3D8A57",treated:"#2B6B44",hidden:"#8C98A3"};
+// The map is for snow-clearing crews: only snow, wet snow (slush) and ice in the middle of the sidewalk.
+// Everything else (dry, wet, blocked, not visible, hazards only at the edge) stays in the system and the CSV report.
+const LV_ORDER=["ice","slush","snow","treated"];
+const COLOR={ice:"#C3352B",slush:"#DD7A1C",snow:"#3A78B8",treated:"#2B6B44",none:"#8C98A3",high:"#C3352B",blocked:"#7A4FA3",clear:"#3D8A57",hidden:"#8C98A3"};
 const CLASS_RISK={ice:100,blocked:80,snow:60,wet:30,clear:0,not_visible:null};
 const BRIDGES={"Akmens tilts":[56.9466,24.0975],"Vanšu tilts":[56.9565,24.0905],"Salu tilts":[56.9395,24.1295],"Dzelzceļa tilts":[56.9420,24.1080]};
 let CLASSES=["clear","ice","not_visible","snow","wet"];   // replaced by model/classes.json
 
 let lang=(navigator.language||"").startsWith("lv")?"lv":"en";
 let L=T[lang], points=[], airT=null, apiT=null;
-let show=new Set(["high","blocked","medium","low","treated"]);
+let show=new Set(["ice","slush","snow","treated"]);
 const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 let treated=store.get("ice_treated",{});
 
@@ -320,7 +322,17 @@ function score(p){
   if(p.conf<0.6) rs.push(["low_conf",{}]);
   return [Math.round(s),rs];
 }
-function level(p,s){if(treated[p.id])return"treated";if(s==null)return"hidden";if(p.cls==="blocked")return"blocked";if(s>=80)return"high";if(s>=40)return"medium";if(s>=10)return"low";return"clear"}
+const HAZ=["ice","snow"];
+const argmax=P=>Object.keys(P).reduce((a,b)=>P[a]>=P[b]?a:b);
+function topOf(P){const t=argmax(P); return (t==="blocked"||t==="not_visible")?t:argmax({...P,...fuse(P).q})}
+// ice / slush / snow when the whole frame AND the middle third of it (the walking line) show it; otherwise "none"
+function hazardKind(p){
+  const full=topOf(p.p||{[p.cls]:p.conf}); if(!HAZ.includes(full)) return "none";
+  if(p.c && !HAZ.includes(topOf(p.c))) return "none";
+  if(full==="ice") return "ice";
+  return (airT!=null&&airT>-1&&airT<2)?"slush":"snow";
+}
+function level(p,s){const k=hazardKind(p); if(k==="none") return "none"; return treated[p.id]?"treated":k}
 function rtext(code,pr){let t=L.r[code].replace("{v}",pr.v||"");return t.replace("{cls}",L.classes[pr.cls]||pr.cls).replace("{conf}",pr.conf!=null?Math.round(pr.conf*100)+"%":"").replace("{t}",pr.t!=null?fmtT(pr.t):"").replace("{name}",pr.name||"")}
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
@@ -352,7 +364,7 @@ document.getElementById("tSlider").oninput=e=>{airT=+e.target.value;showTemp();r
 
 function render(){
   computeWeather();
-  const counts={}; LV_ORDER.forEach(k=>counts[k]=0);
+  const counts={none:0}; LV_ORDER.forEach(k=>counts[k]=0);
   points.forEach(p=>{const [s,rs]=score(p);p.score=s;p.rs=rs;p.level=level(p,s);counts[p.level]++});
   // level chips
   const lv=document.getElementById("levels"); lv.innerHTML="";
@@ -362,7 +374,7 @@ function render(){
   // markers
   layer.clearLayers();
   points.forEach(p=>{ if(!show.has(p.level)) return;
-    const r0=p.level==="high"?9:7;
+    const r0=p.level==="ice"?9:7;
     const m=window.L.circleMarker([p.lat,p.lon],{radius:r0,color:"#fff",weight:1.5,fillColor:COLOR[p.level],fillOpacity:.95});
     m.on("mouseover",()=>{m.setRadius(r0*1.7);m.setStyle({weight:2.5});m.bringToFront()});
     m.on("mouseout",()=>{m.setRadius(r0);m.setStyle({weight:1.5})});
@@ -370,7 +382,7 @@ function render(){
     m.bindPopup(`<b>${esc(L.levels[p.level])}</b>${p.score!=null?` · ${L.risk} ${p.score}`:""}<br>${why}${p.thumb?`<img src="${p.thumb}" alt="">`:""}<br><small>${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}${p.date?" · "+esc(p.date):""}</small>`);
     m.addTo(layer); markers[p.id]=m });
   // top 10
-  const top=points.filter(p=>p.score>=10).sort((a,b)=>b.score-a.score).slice(0,10);
+  const top=points.filter(p=>HAZ.includes(hazardKind(p))&&p.level!=="treated").sort((a,b)=>b.score-a.score).slice(0,10);
   const ol=document.getElementById("top"); ol.innerHTML="";
   if(!top.length){ol.innerHTML=`<li style="grid-template-columns:1fr;border-left-color:var(--clear)"><span class="empty">${esc(L.none)}</span></li>`}
   top.forEach((p,i)=>{const li=document.createElement("li");li.style.setProperty("--c",COLOR[p.level]);
@@ -412,9 +424,10 @@ async function getSession(){
   session=await ort.InferenceSession.create("model/icespotter_v5.onnx",{executionProviders:["wasm"]});
   return session;
 }
-function toTensor(img,roi){
+function toTensor(img,roi,mid){
   let sx=0,sy=0,sw=img.naturalWidth,sh=img.naturalHeight;
   if(roi){sx=sw*0.25;sy=sh*0.65;sw=sw*0.5;sh=sh*0.33}
+  if(mid){sx+=sw/3;sw=sw/3}   // middle third = the walking line
   // thumbnail to 320 like the server, then resize shortest side to 224 and centre-crop
   let k=Math.min(1,320/Math.max(sw,sh)); let w=Math.round(sw*k), h=Math.round(sh*k);
   const c1=document.createElement("canvas");c1.width=w;c1.height=h;c1.getContext("2d").drawImage(img,sx,sy,sw,sh,0,0,w,h);
@@ -445,7 +458,10 @@ async function handle(file){
   document.getElementById("result").innerHTML=`<div class="result"><img src="${thumb}" alt=""><div><h3 style="font-size:30px">${esc(L.classes[cls])} · ${Math.round(conf*100)}%</h3><div class="probs">${
     CLASSES.map((c,i)=>`<div><span>${esc(L.classes[c])}</span><span class="bar"><i style="width:${(fused[i]*100).toFixed(1)}%;background:${levelColor[c]}"></i></span><span>${Math.round(fused[i]*100)}%</span></div>`).join("")}</div>
     <p class="status" style="margin-top:8px">${esc(L.fusedNote)}</p></div></div>`;
-  const p={id:"upload-"+Date.now(),cls,conf:+conf.toFixed(3),p:raw,date:new Date().toISOString().slice(0,10),thumb};
+  const [tm]=toTensor(img,document.getElementById("roi").checked,true);
+  const om=await s.run({[s.inputNames[0]]:tm}); const pm=Array.from(om[s.outputNames[0]].data);
+  const p={id:"upload-"+Date.now(),cls,conf:+conf.toFixed(3),p:raw,c:Object.fromEntries(CLASSES.map((c,i)=>[c,pm[i]])),date:new Date().toISOString().slice(0,10),thumb};
+  if(hazardKind(p)==="none"){status(HAZ.includes(cls)?L.edge:L.offMap);URL.revokeObjectURL(url);return}
   const gps=await readGPS(file);
   if(gps){[p.lat,p.lon]=gps;points.push(p);render();lmap.setView(gps,16);status(L.gpsYes)}
   else{pending=p;status(L.gpsNo)}
