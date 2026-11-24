@@ -11,7 +11,7 @@ Built at **RobotHack 2026** (Riga, 24–28 November 2026) for the challenge *PCH
 4. **Dispatch** – a map of Riga with a Top‑10 list of places to send crews first, a "treated" button for contractor control and a CSV report.
 
 ## Results (honest)
-- 95% accuracy on 65 new Riga street photos from districts the model never saw (previous version: 72%).
+- 88% ± 3% accuracy on 582 hand-labelled Riga photos, 4-fold cross-validation (6 classes incl. "blocked").
 - 99% on ice images from the public Roads dataset.
 - Few real Riga ice photos yet – that is the next step for a pilot.
 
