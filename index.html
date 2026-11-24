@@ -309,7 +309,7 @@ function score(p){
   const P=p.p||{[p.cls]:p.conf}, g=k=>P[k]||0;
   const T=airT;
   const iceGivenWet=Math.max(W.iceNow, T==null?0:(T<=0?0.9:(T<=2?0.5:0)));
-  const iw=g("wet")*iceGivenWet, ic=g("clear")*W.iceNow*0.35;
+  const iw=g("wet")*iceGivenWet, ic=g("clear")*W.iceNow*0.25;
   const sn=W.snowNow*0.5, sc=(g("clear")-ic)*sn, sw=(g("wet")-iw)*sn;
   const q={ice:g("ice")+iw+ic, snow:g("snow")+sc+sw, wet:g("wet")-iw-sw, clear:g("clear")-ic-sc};
   let s=100*q.ice+60*q.snow+30*q.wet;
@@ -321,7 +321,7 @@ function score(p){
   if(p.conf<0.6) rs.push(["low_conf",{}]);
   return [Math.round(s),rs];
 }
-function level(p,s){if(treated[p.id])return"treated";if(s==null)return"hidden";if(s>=80)return"high";if(s>=40)return"medium";if(s>0)return"low";return"clear"}
+function level(p,s){if(treated[p.id])return"treated";if(s==null)return"hidden";if(s>=80)return"high";if(s>=40)return"medium";if(s>=10)return"low";return"clear"}
 function rtext(code,pr){let t=L.r[code].replace("{v}",pr.v||"");return t.replace("{cls}",L.classes[pr.cls]||pr.cls).replace("{conf}",pr.conf!=null?Math.round(pr.conf*100)+"%":"").replace("{t}",pr.t!=null?fmtT(pr.t):"").replace("{name}",pr.name||"")}
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
@@ -371,7 +371,7 @@ function render(){
     m.bindPopup(`<b>${esc(L.levels[p.level])}</b>${p.score!=null?` · ${L.risk} ${p.score}`:""}<br>${why}${p.thumb?`<img src="${p.thumb}" alt="">`:""}<br><small>${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}${p.date?" · "+esc(p.date):""}</small>`);
     m.addTo(layer); markers[p.id]=m });
   // top 10
-  const top=points.filter(p=>p.score>0).sort((a,b)=>b.score-a.score).slice(0,10);
+  const top=points.filter(p=>p.score>=10).sort((a,b)=>b.score-a.score).slice(0,10);
   const ol=document.getElementById("top"); ol.innerHTML="";
   if(!top.length){ol.innerHTML=`<li style="grid-template-columns:1fr;border-left-color:var(--clear)"><span class="empty">${esc(L.none)}</span></li>`}
   top.forEach((p,i)=>{const li=document.createElement("li");li.style.setProperty("--c",COLOR[p.level]);
