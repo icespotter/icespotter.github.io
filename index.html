@@ -187,7 +187,7 @@ footer .wrap{display:grid;gap:6px}
       <ol class="steps">
         <li data-i="s1">A camera on a bus or sidewalk tractor takes 1–3 frames per second with GPS and time.</li>
         <li data-i="s2">A small neural network (YOLO11n) labels the sidewalk: dry, wet, snow, ice or not visible.</li>
-        <li data-i="s3">The risk score adds air temperature (wet at +2 °C or colder is treated as likely black ice), bridges and model confidence. Under 60% confidence a person checks it.</li>
+        <li data-i="s3">The risk score joins the photo with the weather for the next hours: temperature, dew point and precipitation give the chance of ice, wet snow and snow. Black ice is invisible on a photo, so the forecast raises the risk where a wet or dry-looking surface is about to freeze. Bridges and model confidence count too; under 60% a person checks it.</li>
         <li data-i="s4">The dispatcher sees the map and the Top 10 places to send crews. “Treated” marks give objective proof for contractor control.</li>
       </ol>
     </div>
@@ -221,7 +221,7 @@ const T = {
   mLoad:"Loading the model (6 MB) …",mRun:"Classifying…",mErr:"The model could not load. Check the connection and try again.",
   gpsYes:"GPS found in the photo – added to the map.",gpsNo:"No GPS in the photo. Click the map to place this point.",placed:"Placed on the map.",
   aboutTitle:"How it works",s1:"A camera on a bus or sidewalk tractor takes 1–3 frames per second with GPS and time.",s2:"A small neural network (YOLO11n) labels the sidewalk: dry, wet, snow, ice or not visible.",
-  s3:"The risk score adds air temperature (wet at +2 °C or colder is treated as likely black ice), bridges and model confidence. Under 60% confidence a person checks it.",
+  s3:"The risk score joins the photo with the weather for the next hours: temperature, dew point and precipitation give the chance of ice, wet snow and snow. Black ice is invisible on a photo, so the forecast raises the risk where a wet or dry-looking surface is about to freeze. Bridges and model confidence count too; under 60% a person checks it.",
   s4:"The dispatcher sees the map and the Top 10 places to send crews. “Treated” marks give objective proof for contractor control.",
   f1:"on 65 new Riga street photos the model never saw",f2:"winter street photos of Riga collected, about 600 labelled by hand",f3:"extra vehicles: cameras ride on transport that already drives",
   honest:"Honest note: there are few real Riga ice photos yet. The map points are demo data from Mapillary, not live cameras.",
@@ -238,7 +238,7 @@ const T = {
   mLoad:"Ielādēju modeli (6 MB) …",mRun:"Klasificēju…",mErr:"Modeli neizdevās ielādēt. Pārbaudi savienojumu un mēģini vēlreiz.",
   gpsYes:"Fotogrāfijā atrasts GPS – pievienots kartei.",gpsNo:"Fotogrāfijā nav GPS. Noklikšķini kartē, lai novietotu punktu.",placed:"Novietots kartē.",
   aboutTitle:"Kā tas darbojas",s1:"Kamera uz autobusa vai ietvju traktora uzņem 1–3 kadrus sekundē ar GPS un laiku.",s2:"Mazs neironu tīkls (YOLO11n) nosaka ietves stāvokli: sauss, slapjš, sniegs, ledus vai nav redzams.",
-  s3:"Riska novērtējums ņem vērā gaisa temperatūru (slapjš pie +2 °C vai aukstāk – iespējams melnais ledus), tiltus un modeļa ticamību. Ja ticamība zem 60%, pārbauda cilvēks.",
+  s3:"Riska novērtējums apvieno foto ar laikapstākļiem nākamajām stundām: temperatūra, rasas punkts un nokrišņi dod apledojuma, slapja sniega un sniega iespējamību. Melnais ledus fotogrāfijā nav redzams, tāpēc prognoze paaugstina risku tur, kur slapja vai sausa virsma drīz sasals. Tiek ņemti vērā arī tilti un modeļa ticamība; zem 60% pārbauda cilvēks.",
   s4:"Dispečers redz karti un Top 10 vietas, kur sūtīt brigādes. Atzīmes “apstrādāts” dod objektīvu pierādījumu darbuzņēmēja kontrolei.",
   f1:"uz 65 jaunām Rīgas ielu fotogrāfijām, ko modelis nebija redzējis",f2:"Rīgas ziemas ielu fotogrāfijas savāktas, ap 600 marķētas ar roku",f3:"papildu transporta: kameras brauc ar transportu, kas jau kursē",
   honest:"Godīgi: īstu Rīgas ledus fotogrāfiju vēl ir maz. Kartes punkti ir demo dati no Mapillary, nevis tiešraides kameras.",
