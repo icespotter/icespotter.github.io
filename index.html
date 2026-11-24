@@ -401,7 +401,7 @@ document.getElementById("csv").onclick=()=>{
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="icespotter_report.csv";a.click();URL.revokeObjectURL(a.href)};
 
 // data + weather
-fetch("points.json").then(r=>r.json()).then(d=>{points=d.map(p=>({...p,thumb:`thumbs/${p.id}.jpg`}));render()});
+fetch("points.json",{cache:"no-cache"}).then(r=>r.json()).then(d=>{points=d.map(p=>({...p,thumb:`thumbs/${p.id}.jpg`}));render()});
 fetch("https://api.open-meteo.com/v1/forecast?latitude=56.9496&longitude=24.1052&current=temperature_2m"+
   "&hourly=temperature_2m,dew_point_2m,precipitation,snowfall,precipitation_probability,weather_code&past_days=1&forecast_days=2&timezone=Europe%2FRiga")
   .then(r=>r.json()).then(j=>{apiT=+j.current.temperature_2m; if(!document.getElementById("tManual").checked) airT=apiT;
@@ -420,7 +420,7 @@ async function getSession(){
   status(L.mLoad);
   if(!window.ort) await loadLib("https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.min.js");
   ort.env.wasm.wasmPaths="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/";
-  try{CLASSES=await fetch("model/classes.json").then(r=>r.json())}catch(e){}
+  try{CLASSES=await fetch("model/classes.json",{cache:"no-cache"}).then(r=>r.json())}catch(e){}
   session=await ort.InferenceSession.create("model/icespotter_v5.onnx",{executionProviders:["wasm"]});
   return session;
 }
