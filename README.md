@@ -1,6 +1,6 @@
 # IceSpotter – winter sidewalk hazard map for Riga
 
-**IceSpotter** finds icy, snowy and wet sidewalks in Riga from camera photos and shows them on a map, so winter maintenance crews know where to go first.
+**IceSpotter** finds snow and ice on Riga sidewalks from camera photos and the weather forecast, and shows winter maintenance crews where to clean first.
 
 Built at **RobotHack 2026** (Riga, 24–28 November 2026) for the challenge *PCH4 "Spot Winter Sidewalk Hazards"* by Rīgas pašvaldība (Riga City Council).
 
