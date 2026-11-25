@@ -162,9 +162,9 @@ footer .wrap{display:grid;gap:6px}
 <section class="band" id="check">
   <div class="wrap cols">
     <div class="prose">
-      <h2 data-i="checkTitle">Check a sidewalk photo</h2>
-      <p data-i="checkP1">Upload a photo of a sidewalk. The neural network runs right here in your browser – the photo is not sent anywhere.</p>
-      <p data-i="checkP2">Only snow, wet snow and ice in the middle of the sidewalk go on the crews’ map. If the photo has GPS, the point lands at that place; if not, click the map to place it.</p>
+      <h2 data-i="checkTitle">Try the model</h2>
+      <p data-i="checkP1">This is a demo of our neural network. Upload any sidewalk photo and see what it finds. The model runs right here in your browser – the photo is not sent anywhere.</p>
+      <p data-i="checkP2">In real use, photos come only from cameras on city vehicles, and the map is available only to the city and its contractors. Only snow, wet snow and ice in the middle of the sidewalk go on the map.</p>
     </div>
     <div class="check">
       <label class="drop"><input type="file" id="file" accept="image/*"><span data-i="drop">Choose or drop a photo</span></label>
@@ -192,7 +192,7 @@ footer .wrap{display:grid;gap:6px}
         <div><b>700</b><span data-i="f2">winter street photos of Riga collected, about 600 labelled by hand</span></div>
         <div><b>0 €</b><span data-i="f3">extra vehicles: cameras ride on transport that already drives</span></div>
       </div>
-      <p class="status" style="margin-top:16px" data-i="honest">Honest note: there are few real Riga ice photos yet. The map points are demo data from Mapillary, not live cameras.</p>
+      <p class="status" style="margin-top:16px" data-i="honest">Honest note: this public site is a demo. There are few real Riga ice photos yet, and the map points are demo data from Mapillary, not live cameras.</p>
     </div>
   </div>
 </section>
@@ -211,7 +211,7 @@ const T = {
  en:{tag:"RobotHack 2026 · challenge PCH4 for Rīgas pašvaldība",title:"Hazardous sidewalks of Riga",lead:"Cameras on city vehicles → neural network → a map and a list of where to send crews first.",
   tLoading:"Loading Riga weather…",tNow:"Riga now (Open-Meteo)",tNone:"Weather unavailable – set it by hand",tHand:"set by hand",tManual:"What if the temperature were… (demo)",fusedNote:"Photo analysed by the neural network, then adjusted by the Riga weather forecast for the next hours (ice is often invisible on a photo).",wxIce:"Ice / black ice",wxSlush:"Wet snow / slush",wxSnow:"Snow",wxPeak:"peak at {h}",wxNone:"no risk",wxScen:"scenario: {t} all day",
   topTitle:"Top 10: send crews here first",none:"No snow or ice on the sidewalks right now.",offMap:"Not a cleaning job – saved in the system, not shown on the crews’ map.",edge:"Snow/ice only at the edge – the walking line is clear, not shown on the map.",csv:"Download report (CSV)",reset:"Reset “treated”",treat:"Mark as treated",show:"Show",risk:"risk",
-  checkTitle:"Check a sidewalk photo",checkP1:"Upload a photo of a sidewalk. The neural network runs right here in your browser – the photo is not sent anywhere.",checkP2:"Only snow, wet snow and ice in the middle of the sidewalk go on the crews’ map. If the photo has GPS, the point lands at that place; if not, click the map to place it.",
+  checkTitle:"Try the model",checkP1:"This is a demo of our neural network. Upload any sidewalk photo and see what it finds. The model runs right here in your browser – the photo is not sent anywhere.",checkP2:"In real use, photos come only from cameras on city vehicles, and the map is available only to the city and its contractors. Only snow, wet snow and ice in the middle of the sidewalk go on the map.",
   drop:"Choose or drop a photo",roi:"Wide frame from a vehicle: look only at the sidewalk in front (bottom centre)",
   mLoad:"Loading the model (6 MB) …",mRun:"Classifying…",mErr:"The model could not load. Check the connection and try again.",
   gpsYes:"GPS found in the photo – added to the map.",gpsNo:"No GPS in the photo. Click the map to place this point.",placed:"Placed on the map.",
@@ -219,7 +219,7 @@ const T = {
   s3:"The risk score joins the photo with the weather for the next hours: temperature, dew point and precipitation give the chance of ice, wet snow and snow. Black ice is invisible on a photo, so the forecast raises the risk where a wet or dry-looking surface is about to freeze. Bridges and model confidence count too; under 60% a person checks it.",
   s4:"Crews see only what they must clean: snow, wet snow and ice in the walking line, plus the Top 10 places to go first. Everything else stays in the system report. “Treated” marks give objective proof for contractor control.",
   f1:"accuracy on 582 hand-labelled Riga photos (4-fold cross-validation)",f2:"winter street photos of Riga collected, about 600 labelled by hand",f3:"extra vehicles: cameras ride on transport that already drives",
-  honest:"Honest note: there are few real Riga ice photos yet. The map points are demo data from Mapillary, not live cameras.",
+  honest:"Honest note: this public site is a demo. There are few real Riga ice photos yet, and the map points are demo data from Mapillary, not live cameras.",
   src:"Street images: Mapillary, CC BY-SA 4.0 · Training data: Roads dataset (Jeswin Wilson, Roboflow Universe), CC BY 4.0 · Weather: Open-Meteo · Map: © OpenStreetMap contributors",
   levels:{ice:"ice",slush:"wet snow",snow:"snow",treated:"treated",none:"no action needed"},
   classes:{ice:"ice",snow:"snow",wet:"wet",clear:"dry",not_visible:"not visible",blocked:"blocked"},
@@ -228,7 +228,7 @@ const T = {
  lv:{tag:"RobotHack 2026 · izaicinājums PCH4 Rīgas pašvaldībai",title:"Bīstamās Rīgas ietves",lead:"Kameras uz pilsētas transporta → neironu tīkls → karte un saraksts, kur sūtīt brigādes vispirms.",
   tLoading:"Ielādēju Rīgas laikapstākļus…",tNow:"Rīgā tagad (Open-Meteo)",tNone:"Laikapstākļi nav pieejami – iestati manuāli",tHand:"iestatīts manuāli",tManual:"Ja temperatūra būtu… (demo)",fusedNote:"Foto analizē neironu tīkls, pēc tam rezultātu precizē Rīgas laikapstākļu prognoze nākamajām stundām (ledus fotogrāfijā bieži nav redzams).",wxIce:"Apledojums / melnais ledus",wxSlush:"Slapjš sniegs / šķīdonis",wxSnow:"Sniegs",wxPeak:"maksimums {h}",wxNone:"nav riska",wxScen:"scenārijs: {t} visu dienu",
   topTitle:"Top 10: kur sūtīt brigādes vispirms",none:"Pašlaik uz ietvēm nav sniega vai ledus.",offMap:"Nav tīrīšanas darbs – saglabāts sistēmā, brigāžu kartē netiek rādīts.",edge:"Sniegs/ledus tikai malā – gājēju josla tīra, kartē netiek rādīts.",csv:"Lejupielādēt atskaiti (CSV)",reset:"Atiestatīt “apstrādāts”",treat:"Atzīmēt kā apstrādātu",show:"Rādīt",risk:"risks",
-  checkTitle:"Pārbaudi ietves foto",checkP1:"Augšupielādē ietves fotogrāfiju. Neironu tīkls darbojas tieši tavā pārlūkā – foto netiek nekur sūtīts.",checkP2:"Brigāžu kartē nonāk tikai sniegs, slapjš sniegs un ledus ietves vidū. Ja fotogrāfijā ir GPS, punkts parādās šajā vietā; ja nav, noklikšķini kartē, lai to novietotu.",
+  checkTitle:"Izmēģini modeli",checkP1:"Šis ir mūsu neironu tīkla demo. Augšupielādē jebkuru ietves fotogrāfiju un apskaties, ko tas atrod. Modelis darbojas tieši tavā pārlūkā – foto netiek nekur sūtīts.",checkP2:"Reālā lietošanā foto nāk tikai no kamerām uz pilsētas transporta, un karte ir pieejama tikai pašvaldībai un tās darbuzņēmējiem. Kartē nonāk tikai sniegs, slapjš sniegs un ledus ietves vidū.",
   drop:"Izvēlies vai ievelc foto",roi:"Plats kadrs no transporta: skatīties tikai uz ietvi priekšā (apakšā centrā)",
   mLoad:"Ielādēju modeli (6 MB) …",mRun:"Klasificēju…",mErr:"Modeli neizdevās ielādēt. Pārbaudi savienojumu un mēģini vēlreiz.",
   gpsYes:"Fotogrāfijā atrasts GPS – pievienots kartei.",gpsNo:"Fotogrāfijā nav GPS. Noklikšķini kartē, lai novietotu punktu.",placed:"Novietots kartē.",
@@ -236,7 +236,7 @@ const T = {
   s3:"Riska novērtējums apvieno foto ar laikapstākļiem nākamajām stundām: temperatūra, rasas punkts un nokrišņi dod apledojuma, slapja sniega un sniega iespējamību. Melnais ledus fotogrāfijā nav redzams, tāpēc prognoze paaugstina risku tur, kur slapja vai sausa virsma drīz sasals. Tiek ņemti vērā arī tilti un modeļa ticamība; zem 60% pārbauda cilvēks.",
   s4:"Brigādes redz tikai to, kas jātīra: sniegu, slapju sniegu un ledu gājēju joslā, un Top 10 vietas, kur doties vispirms. Viss pārējais paliek sistēmas atskaitē. Atzīmes “apstrādāts” dod objektīvu pierādījumu darbuzņēmēja kontrolei.",
   f1:"precizitāte uz 582 ar roku marķētām Rīgas fotogrāfijām (4-kārtīga šķērspārbaude)",f2:"Rīgas ziemas ielu fotogrāfijas savāktas, ap 600 marķētas ar roku",f3:"papildu transporta: kameras brauc ar transportu, kas jau kursē",
-  honest:"Godīgi: īstu Rīgas ledus fotogrāfiju vēl ir maz. Kartes punkti ir demo dati no Mapillary, nevis tiešraides kameras.",
+  honest:"Godīgi: šī publiskā lapa ir demo. Īstu Rīgas ledus fotogrāfiju vēl ir maz, un kartes punkti ir demo dati no Mapillary, nevis tiešraides kameras.",
   src:"Ielu attēli: Mapillary, CC BY-SA 4.0 · Apmācības dati: Roads dataset (Jeswin Wilson, Roboflow Universe), CC BY 4.0 · Laikapstākļi: Open-Meteo · Karte: © OpenStreetMap contributors",
   levels:{ice:"ledus",slush:"slapjš sniegs",snow:"sniegs",treated:"apstrādāts",none:"nav jārīkojas"},
   classes:{ice:"ledus",snow:"sniegs",wet:"slapjš",clear:"sauss",not_visible:"nav redzams",blocked:"aizšķērsots"},
