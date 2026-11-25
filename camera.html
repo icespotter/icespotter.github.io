@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#17222B">
+<title>IceSpotter camera module</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧊</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#17222B;--paper:#EEF3F6;--dim:#A9B8C4;--ice:#C3352B;--slush:#DD7A1C;--snow:#3A78B8;--ok:#3D8A57}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--ink);color:var(--paper);font:400 16px/1.4 Barlow,system-ui,sans-serif}
+main{display:grid;grid-template-rows:auto 1fr auto;height:100%;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+header{display:flex;justify-content:space-between;align-items:baseline;padding:12px 16px}
+header b{font:700 24px/1 "Barlow Condensed",sans-serif}
+header span{color:var(--dim);font-size:14px}
+.view{position:relative;overflow:hidden;background:#000}
+video{width:100%;height:100%;object-fit:cover;display:block}
+.mid{position:absolute;top:0;bottom:0;left:33.3%;width:33.4%;border-left:2px dashed rgba(255,255,255,.45);border-right:2px dashed rgba(255,255,255,.45);pointer-events:none}
+.res{position:absolute;left:12px;right:12px;bottom:12px;background:rgba(23,34,43,.86);border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.res b{font:700 30px/1 "Barlow Condensed",sans-serif}
+.res .sent{font-size:14px;color:var(--dim);text-align:right}
+.panel{padding:12px 16px 16px;display:grid;gap:10px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.stats div{background:#22303B;border-radius:8px;padding:8px 4px}
+.stats b{display:block;font:700 26px/1 "Barlow Condensed",sans-serif}
+.stats small{color:var(--dim);font-size:13px}
+button.go{all:unset;text-align:center;background:var(--paper);color:var(--ink);border-radius:12px;padding:16px;font:700 22px/1 "Barlow Condensed",sans-serif;cursor:pointer}
+button.go[aria-pressed=true]{background:var(--ice);color:#fff}
+button.go:focus-visible{outline:3px solid #7FB2F0;outline-offset:3px}
+.status{font-size:14px;color:var(--dim);min-height:1.4em}
+.row{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--dim)}
+.row select{background:#22303B;color:var(--paper);border:0;border-radius:6px;padding:4px 8px;font:inherit}
+</style>
+</head>
+<body>
+<main>
+  <header><b>🧊 IceSpotter</b><span>camera module · demo</span></header>
+  <div class="view">
+    <video id="v" playsinline muted autoplay></video>
+    <div class="mid" aria-hidden="true"></div>
+    <div class="res" id="res" hidden><b id="rCls">–</b><span class="sent" id="rSent"></span></div>
+  </div>
+  <div class="panel">
+    <div class="stats">
+      <div><b id="nShot">0</b><small>frames</small></div>
+      <div><b id="nSent">0</b><small>sent to map</small></div>
+      <div><b id="gps">–</b><small>GPS accuracy</small></div>
+    </div>
+    <div class="row"><span>Frame every</span>
+      <select id="every"><option value="2000">2 s</option><option value="3000" selected>3 s</option><option value="5000">5 s</option></select></div>
+    <button class="go" id="go" type="button" aria-pressed="false">Start</button>
+    <div class="status" id="st" aria-live="polite">Point the camera at the sidewalk in front of you and press Start.</div>
+  </div>
+</main>
+<script>
+// The camera module: the neural network runs here on the phone. Only snow / ice / wet results
+// (with a small photo) are sent to the server; dry frames never leave the device.
+const SB_URL="https://vilvnqmsqdzsrdrvdfwl.supabase.co", SB_KEY="sb_publishable_JPBRxTHo05W5Mn03Xj3eTA_EvyMCxKI";
+const SEND=new Set(["ice","snow","wet","blocked"]);
+const NAME={ice:"Ice",snow:"Snow",wet:"Wet",clear:"Clear",not_visible:"Not visible",blocked:"Blocked"};
+const COLOR={ice:"var(--ice)",snow:"var(--snow)",wet:"var(--slush)",clear:"var(--ok)",not_visible:"var(--dim)",blocked:"#9C7CC4"};
+const $=id=>document.getElementById(id);
+let session=null, CLASSES=null, stream=null, timer=null, pos=null, watch=null, lock=null, busy=false;
+let nShot=0, nSent=0, last=null;
+const st=t=>$("st").textContent=t;
+
+function loadLib(src){return new Promise((ok,no)=>{const s=document.createElement("script");s.src=src;s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
+async function getSession(){
+  if(session) return session;
+  st("Loading the model (6 MB)…");
+  await loadLib("https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.min.js");
+  ort.env.wasm.wasmPaths="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/";
+  CLASSES=await fetch("model/classes.json",{cache:"no-cache"}).then(r=>r.json());
+  session=await ort.InferenceSession.create("model/icespotter_v5.onnx",{executionProviders:["wasm"]});
+  return session;
+}
+// same preprocessing as the site and the server: thumbnail to 320, shortest side to 224, centre crop
+function tensor(src,sx,sy,sw,sh){
+  const k=Math.min(1,320/Math.max(sw,sh)), w=Math.round(sw*k), h=Math.round(sh*k);
+  const c1=document.createElement("canvas");c1.width=w;c1.height=h;c1.getContext("2d").drawImage(src,sx,sy,sw,sh,0,0,w,h);
+  const s=224/Math.min(w,h), W=Math.max(224,Math.round(w*s)), H=Math.max(224,Math.round(h*s));
+  const c2=document.createElement("canvas");c2.width=224;c2.height=224;const x=c2.getContext("2d");x.imageSmoothingQuality="high";
+  x.drawImage(c1,(224-W)/2,(224-H)/2,W,H);
+  const d=x.getImageData(0,0,224,224).data, f=new Float32Array(3*224*224);
+  for(let i=0;i<224*224;i++){f[i]=d[i*4]/255;f[i+50176]=d[i*4+1]/255;f[i+100352]=d[i*4+2]/255}
+  return new ort.Tensor("float32",f,[1,3,224,224]);
+}
+async function probs(t){const o=await session.run({[session.inputNames[0]]:t});const a=Array.from(o[session.outputNames[0]].data);return Object.fromEntries(CLASSES.map((c,i)=>[c,a[i]]))}
+const top=P=>Object.keys(P).reduce((a,b)=>P[a]>=P[b]?a:b);
+function thumb(v){const w=240,h=Math.round(w*v.videoHeight/v.videoWidth);const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(v,0,0,w,h);return c.toDataURL("image/jpeg",0.6)}
+function dist(a,b,c,d){const r=6371000,p1=a*Math.PI/180,p2=c*Math.PI/180,dl=(d-b)*Math.PI/180;return 2*r*Math.asin(Math.sqrt(Math.sin((p2-p1)/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2))}
+
+async function shot(){
+  if(busy) return; const v=$("v"); if(!v.videoWidth) return; busy=true;
+  try{
+    const W=v.videoWidth,H=v.videoHeight;
+    const P=await probs(tensor(v,0,0,W,H)), C=await probs(tensor(v,W/3,0,W/3,H));
+    const cls=top(P), conf=P[cls]; nShot++; $("nShot").textContent=nShot;
+    $("res").hidden=false; $("rCls").textContent=`${NAME[cls]} ${Math.round(conf*100)}%`; $("rCls").style.color=COLOR[cls];
+    let note="";
+    if(!SEND.has(cls)) note="not sent";
+    else if(!pos) note="waiting for GPS";
+    else if(last&&last.cls===cls&&dist(last.lat,last.lon,pos.lat,pos.lon)<8) note="same place";
+    else{
+      const body={lat:pos.lat,lon:pos.lon,cls,conf:+conf.toFixed(3),p:P,c:C,thumb:thumb(v),device:"camera-demo"};
+      const r=await fetch(SB_URL+"/rest/v1/reports",{method:"POST",headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY,"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify(body)});
+      if(r.ok){nSent++;$("nSent").textContent=nSent;last={cls,lat:pos.lat,lon:pos.lon};note="sent to map ✓"}
+      else note="send failed ("+r.status+")";
+    }
+    $("rSent").textContent=note;
+  }catch(e){st("Error: "+e.message)}
+  busy=false;
+}
+async function start(){
+  try{
+    await getSession();
+    st("Starting camera…");
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1280},height:{ideal:720}},audio:false});
+    $("v").srcObject=stream; await $("v").play();
+    watch=navigator.geolocation.watchPosition(p=>{pos={lat:p.coords.latitude,lon:p.coords.longitude};$("gps").textContent=Math.round(p.coords.accuracy)+" m"},
+      e=>{$("gps").textContent="off";st("GPS is off – allow location for this site.")},{enableHighAccuracy:true,maximumAge:2000});
+    try{lock=await navigator.wakeLock?.request("screen")}catch(e){}
+    timer=setInterval(shot,+$("every").value);
+    $("go").textContent="Stop";$("go").setAttribute("aria-pressed","true");
+    st("Running. Snow, ice and wet sidewalks are sent to the map; dry frames stay on the phone.");
+  }catch(e){st("Could not start: "+e.message);stop()}
+}
+function stop(){
+  clearInterval(timer);timer=null;
+  if(stream) stream.getTracks().forEach(t=>t.stop()); stream=null;
+  if(watch!=null) navigator.geolocation.clearWatch(watch); watch=null;
+  try{lock&&lock.release()}catch(e){} lock=null;
+  $("go").textContent="Start";$("go").setAttribute("aria-pressed","false");
+}
+$("go").onclick=()=>timer?(stop(),st("Stopped.")):start();
+$("every").onchange=()=>{if(timer){clearInterval(timer);timer=setInterval(shot,+$("every").value)}};
+document.addEventListener("visibilitychange",async()=>{if(timer&&document.visibilityState==="visible"){try{lock=await navigator.wakeLock?.request("screen")}catch(e){}}});
+</script>
+</body>
+</html>

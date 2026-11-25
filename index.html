@@ -210,7 +210,7 @@ footer .wrap{display:grid;gap:6px}
 const T = {
  en:{tag:"RobotHack 2026 · challenge PCH4 for Rīgas pašvaldība",title:"Hazardous sidewalks of Riga",lead:"Cameras on city vehicles → neural network → a map and a list of where to send crews first.",
   tLoading:"Loading Riga weather…",tNow:"Riga now (Open-Meteo)",tNone:"Weather unavailable – set it by hand",tHand:"set by hand",tManual:"What if the temperature were… (demo)",fusedNote:"Photo analysed by the neural network, then adjusted by the Riga weather forecast for the next hours (ice is often invisible on a photo).",wxIce:"Ice / black ice",wxSlush:"Wet snow / slush",wxSnow:"Snow",wxPeak:"peak at {h}",wxNone:"no risk",wxScen:"scenario: {t} all day",
-  topTitle:"Top 10: send crews here first",none:"No snow or ice on the sidewalks right now.",offMap:"Not a cleaning job – saved in the system, not shown on the crews’ map.",edge:"Snow/ice only at the edge – the walking line is clear, not shown on the map.",csv:"Download report (CSV)",reset:"Reset “treated”",treat:"Mark as treated",show:"Show",risk:"risk",
+  topTitle:"Top 10: send crews here first",none:"No snow or ice on the sidewalks right now.",live:"live camera",offMap:"Not a cleaning job – saved in the system, not shown on the crews’ map.",edge:"Snow/ice only at the edge – the walking line is clear, not shown on the map.",csv:"Download report (CSV)",reset:"Reset “treated”",treat:"Mark as treated",show:"Show",risk:"risk",
   checkTitle:"Try the model",checkP1:"This is a demo of our neural network. Upload any sidewalk photo and see what it finds. The model runs right here in your browser – the photo is not sent anywhere.",checkP2:"In real use, photos come only from cameras on city vehicles, and the map is available only to the city and its contractors. Only snow, wet snow and ice in the middle of the sidewalk go on the map.",
   drop:"Choose or drop a photo",roi:"Wide frame from a vehicle: look only at the sidewalk in front (bottom centre)",
   mLoad:"Loading the model (6 MB) …",mRun:"Classifying…",mErr:"The model could not load. Check the connection and try again.",
@@ -227,7 +227,7 @@ const T = {
   cols:["id","lat","lon","photo date","class","confidence","risk","level","reasons","treated at"]},
  lv:{tag:"RobotHack 2026 · izaicinājums PCH4 Rīgas pašvaldībai",title:"Bīstamās Rīgas ietves",lead:"Kameras uz pilsētas transporta → neironu tīkls → karte un saraksts, kur sūtīt brigādes vispirms.",
   tLoading:"Ielādēju Rīgas laikapstākļus…",tNow:"Rīgā tagad (Open-Meteo)",tNone:"Laikapstākļi nav pieejami – iestati manuāli",tHand:"iestatīts manuāli",tManual:"Ja temperatūra būtu… (demo)",fusedNote:"Foto analizē neironu tīkls, pēc tam rezultātu precizē Rīgas laikapstākļu prognoze nākamajām stundām (ledus fotogrāfijā bieži nav redzams).",wxIce:"Apledojums / melnais ledus",wxSlush:"Slapjš sniegs / šķīdonis",wxSnow:"Sniegs",wxPeak:"maksimums {h}",wxNone:"nav riska",wxScen:"scenārijs: {t} visu dienu",
-  topTitle:"Top 10: kur sūtīt brigādes vispirms",none:"Pašlaik uz ietvēm nav sniega vai ledus.",offMap:"Nav tīrīšanas darbs – saglabāts sistēmā, brigāžu kartē netiek rādīts.",edge:"Sniegs/ledus tikai malā – gājēju josla tīra, kartē netiek rādīts.",csv:"Lejupielādēt atskaiti (CSV)",reset:"Atiestatīt “apstrādāts”",treat:"Atzīmēt kā apstrādātu",show:"Rādīt",risk:"risks",
+  topTitle:"Top 10: kur sūtīt brigādes vispirms",none:"Pašlaik uz ietvēm nav sniega vai ledus.",live:"tiešraides kamera",offMap:"Nav tīrīšanas darbs – saglabāts sistēmā, brigāžu kartē netiek rādīts.",edge:"Sniegs/ledus tikai malā – gājēju josla tīra, kartē netiek rādīts.",csv:"Lejupielādēt atskaiti (CSV)",reset:"Atiestatīt “apstrādāts”",treat:"Atzīmēt kā apstrādātu",show:"Rādīt",risk:"risks",
   checkTitle:"Izmēģini modeli",checkP1:"Šis ir mūsu neironu tīkla demo. Augšupielādē jebkuru ietves fotogrāfiju un apskaties, ko tas atrod. Modelis darbojas tieši tavā pārlūkā – foto netiek nekur sūtīts.",checkP2:"Reālā lietošanā foto nāk tikai no kamerām uz pilsētas transporta, un karte ir pieejama tikai pašvaldībai un tās darbuzņēmējiem. Kartē nonāk tikai sniegs, slapjš sniegs un ledus ietves vidū.",
   drop:"Izvēlies vai ievelc foto",roi:"Plats kadrs no transporta: skatīties tikai uz ietvi priekšā (apakšā centrā)",
   mLoad:"Ielādēju modeli (6 MB) …",mRun:"Klasificēju…",mErr:"Modeli neizdevās ielādēt. Pārbaudi savienojumu un mēģini vēlreiz.",
@@ -379,7 +379,7 @@ function render(){
     m.on("mouseover",()=>{m.setRadius(r0*1.7);m.setStyle({weight:2.5});m.bringToFront()});
     m.on("mouseout",()=>{m.setRadius(r0);m.setStyle({weight:1.5})});
     const why=p.rs.map(([c,pr])=>"• "+esc(rtext(c,pr))).join("<br>");
-    m.bindPopup(`<b>${esc(L.levels[p.level])}</b>${p.score!=null?` · ${L.risk} ${p.score}`:""}<br>${why}${p.thumb?`<img src="${p.thumb}" alt="">`:""}<br><small>${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}${p.date?" · "+esc(p.date):""}</small>`);
+    m.bindPopup(`<b>${esc(L.levels[p.level])}</b>${p.score!=null?` · ${L.risk} ${p.score}`:""}<br>${why}${p.thumb?`<img src="${p.thumb}" alt="">`:""}<br><small>${p.live?"📷 "+esc(L.live)+" · ":""}${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}${p.date?" · "+esc(p.date):""}</small>`);
     m.addTo(layer); markers[p.id]=m });
   // top 10
   const top=points.filter(p=>HAZ.includes(hazardKind(p))&&p.level!=="treated").sort((a,b)=>b.score-a.score).slice(0,10);
@@ -390,7 +390,7 @@ function render(){
     li.innerHTML=`<img src="${p.thumb}" alt="" loading="lazy"><div><div class="sc">${i+1}. ${esc(L.levels[p.level])} · ${L.risk} ${p.score}</div><div class="why">${esc(L.classes[p.cls])} ${Math.round(p.conf*100)}%${why?" · "+esc(why):""}</div>
       <button type="button" class="goto">${esc(L.show)}</button> <button type="button" class="tr">${esc(L.treat)}</button></div>`;
     li.querySelector(".goto").onclick=()=>{lmap.setView([p.lat,p.lon],17);markers[p.id]&&markers[p.id].openPopup();mapEl.scrollIntoView({behavior:"smooth",block:"center"})};
-    li.querySelector(".tr").onclick=()=>{treated[p.id]=new Date().toISOString().slice(0,16).replace("T"," ");store.set("ice_treated",treated);render()};
+    li.querySelector(".tr").onclick=()=>{treated[p.id]=new Date().toISOString().slice(0,16).replace("T"," ");store.set("ice_treated",treated);if(p.live)markLiveTreated(p);render()};
     ol.appendChild(li)});
 }
 document.getElementById("reset").onclick=()=>{treated={};store.set("ice_treated",treated);render()};
@@ -401,7 +401,36 @@ document.getElementById("csv").onclick=()=>{
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="icespotter_report.csv";a.click();URL.revokeObjectURL(a.href)};
 
 // data + weather
-fetch("points.json",{cache:"no-cache"}).then(r=>r.json()).then(d=>{points=d.map(p=>({...p,thumb:`thumbs/${p.id}.jpg`}));render()});
+fetch("points.json",{cache:"no-cache"}).then(r=>r.json()).then(d=>{points=d.map(p=>({...p,thumb:`thumbs/${p.id}.jpg`})).concat(points.filter(p=>p.live));render()});
+
+// ---------- live points from the camera module (camera.html) via Supabase ----------
+const SB_URL="https://vilvnqmsqdzsrdrvdfwl.supabase.co", SB_KEY="sb_publishable_JPBRxTHo05W5Mn03Xj3eTA_EvyMCxKI";
+const SB_H={apikey:SB_KEY,Authorization:"Bearer "+SB_KEY,"Content-Type":"application/json"};
+const THUMB_OK=/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/;
+let liveSeen=new Set(), liveFirst=true;
+async function pollLive(){
+  try{
+    const since=new Date(Date.now()-24*3600e3).toISOString();
+    const r=await fetch(`${SB_URL}/rest/v1/reports?select=id,created_at,lat,lon,cls,conf,p,c,thumb,treated_at&created_at=gte.${since}&order=id.asc&limit=1000`,{headers:SB_H,cache:"no-store"});
+    if(!r.ok) return; const rows=await r.json(); let added=null;
+    for(const x of rows){
+      const id="live-"+x.id;
+      if(x.treated_at) treated[id]=x.treated_at.slice(0,16).replace("T"," ");
+      if(liveSeen.has(id)) continue; liveSeen.add(id);
+      if(!CLASSES_ALL.includes(x.cls)||!isFinite(x.lat)||!isFinite(x.lon)) continue;
+      const p={id,live:true,lat:+x.lat,lon:+x.lon,cls:x.cls,conf:+x.conf||0,p:x.p||{[x.cls]:+x.conf||1},c:x.c||null,
+        date:x.created_at.slice(0,16).replace("T"," "),thumb:THUMB_OK.test(x.thumb||"")?x.thumb:""};
+      points.push(p); added=p;
+    }
+    if(added){render(); if(!liveFirst&&hazardKind(added)!=="none"){lmap.setView([added.lat,added.lon],16)}}
+    liveFirst=false;
+  }catch(e){}
+}
+const CLASSES_ALL=["blocked","clear","ice","not_visible","snow","wet"];
+pollLive(); setInterval(pollLive,4000);
+async function markLiveTreated(p){
+  try{await fetch(`${SB_URL}/rest/v1/reports?id=eq.${p.id.slice(5)}`,{method:"PATCH",headers:SB_H,body:JSON.stringify({treated_at:new Date().toISOString()})})}catch(e){}
+}
 fetch("https://api.open-meteo.com/v1/forecast?latitude=56.9496&longitude=24.1052&current=temperature_2m"+
   "&hourly=temperature_2m,dew_point_2m,precipitation,snowfall,precipitation_probability,weather_code&past_days=1&forecast_days=2&timezone=Europe%2FRiga")
   .then(r=>r.json()).then(j=>{apiT=+j.current.temperature_2m; if(!document.getElementById("tManual").checked) airT=apiT;
