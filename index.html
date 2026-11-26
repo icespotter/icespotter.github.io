@@ -675,7 +675,7 @@ async function startDemo(){
   const r=TR.find(x=>x.t==="bus"&&x.n==="22")||TR[0]; if(!r) return;
   const path=slicePath(r.L[0],250,4200);
   demo={pts:[],layer:window.L.layerGroup().addTo(lmap),run:true}; demoLabel(); routeLayer.clearLayers();
-  window.L.polyline(path,{color:"#92CEEE",weight:6,opacity:.6}).addTo(demo.layer);
+  window.L.polyline(path,{color:"#062645",weight:5,opacity:.45}).addTo(demo.layer);
   lmap.fitBounds(window.L.latLngBounds(path).pad(0.12));
   const veh=window.L.marker(path[0],{icon:window.L.divIcon({className:"",html:'<div class="veh">🚜</div>',iconSize:[28,28],iconAnchor:[14,14]}),zIndexOffset:2000}).addTo(demo.layer);
   const thumbsBy=c=>points.filter(p=>!p.demo&&p.cls===c&&p.thumb&&p.thumb.startsWith("thumbs/")).map(p=>p.thumb);
