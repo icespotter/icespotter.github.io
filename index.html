@@ -309,7 +309,7 @@ function renderNight(){
   // tonight = 20:00 → 08:00; if it is already night, from now until 08:00
   let a=i0; if(nowHr>=8&&nowHr<20) a=i0+(20-nowHr);
   let b=a; while(b<h.t.length-1&&!(h.time[b].slice(11,13)==="08"&&b>a)) b++;
-  let ice=0,snow=0,slush=0,peak=null,tmin=99;
+  let ice=0.05,snow=0,slush=0,peak=null,tmin=99;
   for(let i=a;i<=b&&i<h.t.length;i++){const r=hourRisk(h,i,Tover);if(r.ice>ice){ice=r.ice;peak=h.time[i].slice(11,16)}snow=Math.max(snow,r.snow);slush=Math.max(slush,r.slush);tmin=Math.min(tmin,Tover??h.t[i])}
   const N=L.night, lvl=ice>=0.6?"high":(ice>=0.3?"medium":"low");
   const col=lvl==="high"?COLOR.ice:(lvl==="medium"?COLOR.slush:(snow>=0.5||slush>=0.5?COLOR.snow:COLOR.treated));
@@ -318,7 +318,7 @@ function renderNight(){
   el.style.setProperty("--nc",col);
   el.innerHTML=`<span class="d">${esc(N.title.replace("{a}",h.time[a].slice(11,16)).replace("{b}","08:00"))}${manual?" "+esc(N.what):""}</span>
     <span class="h">${esc(N[lvl])}${extra?" · "+esc(extra):""}</span>
-    <span class="d">${esc(N.detail.replace("{t}",fmtT(tmin)).replace("{h}",peak||"–"))}</span>
+    <span class="d">${esc(peak?N.detail.replace("{t}",fmtT(tmin)).replace("{h}",peak):N.detail.split(" · ")[0].replace("{t}",fmtT(tmin)))}</span>
     <span class="a">${esc(act)}</span>`;
   el.hidden=false;
 }
@@ -407,7 +407,7 @@ function render(){
   const counts={none:0}; LV_ORDER.forEach(k=>counts[k]=0);
   points.forEach(p=>{const [s,rs]=score(p);p.score=s;p.rs=rs;p.level=level(p,s);counts[p.level]++});
   const qn=points.filter(p=>p.level!=="none"&&p.level!=="treated"&&p.rs.some(r=>r[0]==="recheck")).length;
-  const qc=document.getElementById("qc"); qc.hidden=!qn; if(qn) qc.innerHTML=`<b>⚠ ${qn}</b>${esc(L.qcText.replace("{n}",qn))}`;
+  const qc=document.getElementById("qc"); qc.hidden=!qn; if(qn) qc.innerHTML=`<b>⚠</b>${esc(L.qcText.replace("{n}",qn))}`;
   // level chips
   const lv=document.getElementById("levels"); lv.innerHTML="";
   LV_ORDER.forEach(k=>{const b=document.createElement("button");b.type="button";b.className="lv";b.setAttribute("aria-pressed",show.has(k));
@@ -473,6 +473,7 @@ pollLive(); setInterval(pollLive,4000);
 async function markLiveTreated(p){
   try{await fetch(`${SB_URL}/rest/v1/reports?id=eq.${p.id.slice(5)}`,{method:"PATCH",headers:SB_H,body:JSON.stringify({treated_at:new Date().toISOString()})})}catch(e){}
 }
+function loadWeather(n=0){
 fetch("https://api.open-meteo.com/v1/forecast?latitude=56.9496&longitude=24.1052&current=temperature_2m"+
   "&hourly=temperature_2m,dew_point_2m,precipitation,snowfall,precipitation_probability,weather_code&past_days=1&forecast_days=2&timezone=Europe%2FRiga")
   .then(r=>r.json()).then(j=>{apiT=+j.current.temperature_2m; if(!document.getElementById("tManual").checked) airT=apiT;
@@ -480,7 +481,9 @@ fetch("https://api.open-meteo.com/v1/forecast?latitude=56.9496&longitude=24.1052
     WX={hours:{time:H.time,t:H.temperature_2m,td:H.dew_point_2m,mm:H.precipitation,sn:H.snowfall,pp:H.precipitation_probability,code:H.weather_code},
         nowIdx:Math.max(0,H.time.findIndex(x=>x.slice(0,13)===nowH))};
     showTemp(); render()})
-  .catch(()=>{showTemp()});
+  .catch(()=>{showTemp(); if(n<4) setTimeout(()=>loadWeather(n+1),4000*(n+1))});
+}
+loadWeather();
 
 // ---------- photo check (ONNX in the browser)
 let session=null, pending=null;
