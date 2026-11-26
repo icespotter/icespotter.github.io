@@ -93,6 +93,11 @@ const topCls=P=>Object.keys(P).reduce((a,b)=>P[a]>=P[b]?a:b);
 // GDPR: send only the lower part of the frame (the sidewalk), slightly blurred, so faces and number plates are not stored
 function thumb(v){const W=v.videoWidth,H=v.videoHeight,sy=Math.round(H*0.45),sh=H-sy,w=240,h=Math.round(w*sh/W);
   const c=document.createElement("canvas");c.width=w;c.height=h;const g=c.getContext("2d");g.filter="blur(1.5px)";g.drawImage(v,0,sy,W,sh,0,0,w,h);return c.toDataURL("image/jpeg",0.6)}
+// mean brightness (0-255) of the lower part of the frame: at night without light the model sees "snow" in dark asphalt
+function brightness(v){const c=document.createElement("canvas");c.width=64;c.height=36;const g=c.getContext("2d");
+  g.drawImage(v,0,v.videoHeight*0.45,v.videoWidth,v.videoHeight*0.55,0,0,64,36);const d=g.getImageData(0,0,64,36).data;let s=0;
+  for(let i=0;i<d.length;i+=4) s+=.299*d[i]+.587*d[i+1]+.114*d[i+2]; return s/(d.length/4)}
+const MIN_LIGHT=40, MIN_CONF=0.6;
 function dist(a,b,c,d){const r=6371000,p1=a*Math.PI/180,p2=c*Math.PI/180,dl=(d-b)*Math.PI/180;return 2*r*Math.asin(Math.sqrt(Math.sin((p2-p1)/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2))}
 
 async function shot(){
@@ -102,8 +107,11 @@ async function shot(){
     const P=await probs(tensor(v,0,0,W,H)), C=await probs(tensor(v,W/3,0,W/3,H));
     const cls=topCls(P), conf=P[cls]; nShot++; $("nShot").textContent=nShot;
     $("res").hidden=false; $("rCls").textContent=`${NAME[cls]} ${Math.round(conf*100)}%`; $("rCls").style.color=COLOR[cls];
-    let note="";
+    let note=""; const light=brightness(v), midTop=topCls(C);
     if(!SEND.has(cls)) note="not sent";
+    else if(light<MIN_LIGHT) note="too dark – not sent";
+    else if(conf<MIN_CONF) note="not sure ("+Math.round(conf*100)+"%) – not sent";
+    else if((cls==="snow"||cls==="ice")&&midTop!==cls) note="only at the edge – not sent";
     else if(!pos) note="waiting for GPS";
     else if(last&&last.cls===cls&&dist(last.lat,last.lon,pos.lat,pos.lon)<8) note="same place";
     else{
