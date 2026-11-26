@@ -171,6 +171,19 @@ section.band .status{color:var(--mist)}
 .facts span{color:var(--mist)}
 footer{background:var(--navy);color:var(--mist)}
 footer a{color:var(--sky)}
+
+/* layout like the Figma: centred content column, framed photo box, quiet header */
+.wrap{max-width:1160px;padding:0 32px}
+header .wrap{max-width:none;padding:12px 32px}
+.brand b{font-size:24px}
+.brand span{display:none}
+section.band{padding:72px 0}
+.cols{gap:64px}
+.check{border:1px solid rgba(169,210,245,.22);border-radius:14px;padding:22px;background:rgba(255,255,255,.03)}
+.drop{padding:40px 20px}
+footer{border-top:1px solid rgba(169,210,245,.14)}
+.rail{gap:16px}
+.top li{background:#fff}
 </style>
 </head>
 <body>
@@ -203,6 +216,12 @@ footer a{color:var(--sky)}
     <div class="levels" id="levels" aria-label="Show levels on the map"></div>
     <div class="qc" id="qc" hidden></div>
 
+
+
+    <div class="top">
+      <h2 data-i="topTitle">Top 10: send crews here first</h2>
+      <ol id="top"></ol>
+    </div>
     <div class="route" id="routeBox">
       <h3 data-i="rtTitle">Crew route</h3>
       <div class="rrow">
@@ -212,7 +231,6 @@ footer a{color:var(--sky)}
       <div class="rrow"><button class="btn primary" id="rtGo" type="button" data-i="rtGo">Plan route</button><a class="btn" id="rtNav" target="_blank" rel="noopener" hidden data-i="rtNav">Open in Google Maps</a><button class="btn" id="rtClear" type="button" hidden data-i="rtClear">Clear</button></div>
       <div class="status" id="rtInfo"></div>
     </div>
-
     <details class="route" id="camBox">
       <summary><h3 style="display:inline" data-i="cmTitle">Camera routes on public transport</h3></summary>
       <p class="status" data-i="cmLead">Pick bus, trolleybus and tram routes that would carry a camera. The map shows which streets they cover and how often a vehicle passes in the morning (6–9).</p>
@@ -221,11 +239,6 @@ footer a{color:var(--sky)}
       <div class="cmlist" id="cmList"></div>
       <small class="status" data-i="cmSrc">Data: Rīgas satiksme timetables (GTFS), data.gov.lv, CC0.</small>
     </details>
-
-    <div class="top">
-      <h2 data-i="topTitle">Top 10: send crews here first</h2>
-      <ol id="top"></ol>
-    </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn" id="csv" type="button" data-i="csv">Download report (CSV)</button>
       <button class="btn" id="reset" type="button" data-i="reset">Reset “treated”</button>
