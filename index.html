@@ -11,7 +11,7 @@
 <meta property="og:description" content="Cameras on city vehicles → neural network → a map of Riga and a list of where to send crews first.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://icespotter.github.io/">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧊</text></svg>">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
@@ -136,12 +136,47 @@ footer .wrap{display:grid;gap:6px}
   .rail h1{font-size:38px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ===== design by Anna (Figma): deep navy page, light dispatch rail, sky-blue accents ===== */
+:root{--navy:#0C2A4B;--navy2:#123A63;--navy3:#1B4A7A;--sky:#A9D2F5;--pale:#EEF4FA;--mist:#C9D9E8}
+body{background:var(--navy)}
+header{background:var(--navy);border-bottom:1px solid rgba(169,210,245,.18)}
+.brand{align-items:center}
+.brand .logo{width:30px;height:38px;flex:none}
+.brand span{color:var(--mist)}
+.lang{border-color:rgba(169,210,245,.35)}
+.lang button{color:var(--mist)}
+.lang button[aria-pressed=true]{background:var(--sky);color:var(--navy)}
+.hero{border-bottom:0}
+.rail{background:var(--pale);border-right:1px solid #D6E2EE}
+.rail h1{color:var(--navy)}
+.btn.primary{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn.primary:hover{background:var(--navy3)}
+.top .tr{background:var(--navy);border-color:var(--navy);color:#fff}
+.top .tr:hover{background:var(--navy3);color:#fff}
+section.band{background:var(--navy);color:#EAF2FA;border-bottom:1px solid rgba(169,210,245,.14)}
+section.band h2{color:#fff}
+section.band .prose p,section.band .steps{color:var(--mist)}
+section.band a{color:var(--sky)}
+section.band .status{color:var(--mist)}
+.check{background:transparent;border:0;padding:0}
+.drop{background:linear-gradient(180deg,var(--navy3),var(--navy2));border:1px dashed rgba(169,210,245,.55);color:#EAF2FA;border-radius:12px;padding:34px}
+.drop:hover,.drop:focus-within{border-color:var(--sky)}
+.check label{color:var(--mist)}
+#result{background:#fff;color:var(--ink);border-radius:12px}
+#result:not(:empty){padding:14px}
+#result .status{color:var(--ink2)}
+.facts div{border-top-color:var(--sky)}
+.facts b{color:#fff}
+.facts span{color:var(--mist)}
+footer{background:var(--navy);color:var(--mist)}
+footer a{color:var(--sky)}
 </style>
 </head>
 <body>
 <header>
   <div class="wrap">
-    <div class="brand"><b>🧊 IceSpotter</b><span data-i="tag">RobotHack 2026 · challenge PCH4 for Rīgas pašvaldība</span></div>
+    <div class="brand"><svg class="logo" viewBox="0 0 64 80" aria-hidden="true"><path d="M32 3C16.5 3 4 15.3 4 30.6c0 19.6 23.4 42.4 26.1 45a2.7 2.7 0 0 0 3.8 0C36.6 73 60 50.2 60 30.6 60 15.3 47.5 3 32 3z" fill="#0C2A4B" stroke="#fff" stroke-width="4"/><g stroke="#fff" stroke-width="3.2" stroke-linecap="round" fill="none"><path d="M32 14v34M17.3 22.5l29.4 17M17.3 39.5l29.4-17"/><path d="M27 17l5 4 5-4M27 45l5-4 5 4M18 29l6 1-2 5M46 33l-6-1 2-5M18 33l6-1-2-5M46 29l-6 1 2 5"/></g></svg><b>IceSpotter</b><span data-i="tag">RobotHack 2026 · challenge PCH4 for Rīgas pašvaldība</span></div>
     <div class="lang" role="group" aria-label="Language">
       <button type="button" data-lang="en" aria-pressed="true">English</button>
       <button type="button" data-lang="lv" aria-pressed="false">Latviešu</button>
