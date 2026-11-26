@@ -690,7 +690,7 @@ function along(path,d){let acc=0;for(let i=1;i<path.length;i++){const [a,b]=path
 async function startDemo(){
   if(!TR.length){try{TR=(await fetch("transport_routes.json").then(r=>r.json())).routes}catch(e){}}
   // drive along real streets: Brīvības iela from the Freedom Monument to the VEF area (OSRM), fallback = bus 22 line
-  const WP=[[56.9514,24.1133],[56.9586,24.1245],[56.9643,24.1343],[56.9705,24.1453],[56.9748,24.1530]];
+  const WP=[[56.9514,24.1133],[56.9806,24.2000]];   // OSRM keeps to Brīvības iela; we drive the first ~4 km
   const sr=await streetRoute(WP.map(([lat,lon])=>({lat,lon})));
   let path=sr?sr.line:null;
   if(!path){const r=TR.find(x=>x.t==="bus"&&x.n==="22")||TR[0]; if(!r) return; path=slicePath(r.L[0],250,4200)}
