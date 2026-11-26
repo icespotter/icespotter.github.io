@@ -65,6 +65,18 @@ header .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:spac
 .night .a{font-size:14px;font-weight:600}
 .qc{padding:10px 14px;border-radius:10px;background:#FBEFE3;border:1px solid #E7B98A;font-size:14px}
 .qc b{font:700 22px/1 "Barlow Condensed",sans-serif;margin-right:6px}
+.route{display:grid;gap:8px;padding:12px 14px;background:#fff;border:1px solid var(--line);border-radius:10px}
+.route h3{font-size:20px}
+.rrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:14px}
+.rrow select{font:inherit;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:#fff}
+a.btn{text-decoration:none;display:inline-block}
+#camBox summary{cursor:pointer;list-style:revert}
+.cmlist{display:grid;gap:2px;max-height:260px;overflow:auto;font-size:14px;border-top:1px solid var(--line);padding-top:6px}
+.cmlist label{display:flex;gap:8px;align-items:center}
+.cmlist .sw{width:14px;height:4px;border-radius:2px;flex:none}
+.cmlist small{color:var(--ink2);margin-left:auto}
+.cmhead{font-weight:600;margin-top:6px}
+.rnum{background:var(--ink);color:#fff;border:2px solid #fff;border-radius:50%;width:24px!important;height:24px!important;display:grid;place-items:center;font:700 13px/1 Barlow,sans-serif;box-shadow:0 1px 4px rgba(0,0,0,.4)}
 .levels{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .lv{all:unset;cursor:pointer;display:grid;gap:2px;padding:8px 10px;border-radius:8px;background:#fff;border:1px solid var(--line)}
 .lv:focus-visible{outline:3px solid var(--signal)}
@@ -156,6 +168,25 @@ footer .wrap{display:grid;gap:6px}
     <div class="levels" id="levels" aria-label="Show levels on the map"></div>
     <div class="qc" id="qc" hidden></div>
 
+    <div class="route" id="routeBox">
+      <h3 data-i="rtTitle">Crew route</h3>
+      <div class="rrow">
+        <select id="rtSet" aria-label="Which places"><option value="top" data-i="rtTop">Top 10 places</option><option value="ice" data-i="rtIce">All ice</option><option value="all" data-i="rtAll">All places to clean</option></select>
+        <label><input type="checkbox" id="rtMe"> <span data-i="rtMe">start from my location</span></label>
+      </div>
+      <div class="rrow"><button class="btn primary" id="rtGo" type="button" data-i="rtGo">Plan route</button><a class="btn" id="rtNav" target="_blank" rel="noopener" hidden data-i="rtNav">Open in Google Maps</a><button class="btn" id="rtClear" type="button" hidden data-i="rtClear">Clear</button></div>
+      <div class="status" id="rtInfo"></div>
+    </div>
+
+    <details class="route" id="camBox">
+      <summary><h3 style="display:inline" data-i="cmTitle">Camera routes on public transport</h3></summary>
+      <p class="status" data-i="cmLead">Pick bus, trolleybus and tram routes that would carry a camera. The map shows which streets they cover and how often a vehicle passes in the morning (6–9).</p>
+      <div class="rrow"><button class="btn primary" id="cmBest" type="button" data-i="cmBest">Suggest best 5</button><button class="btn" id="cmNone" type="button" data-i="cmNone">Clear</button></div>
+      <div class="status" id="cmInfo"></div>
+      <div class="cmlist" id="cmList"></div>
+      <small class="status" data-i="cmSrc">Data: Rīgas satiksme timetables (GTFS), data.gov.lv, CC0.</small>
+    </details>
+
     <div class="top">
       <h2 data-i="topTitle">Top 10: send crews here first</h2>
       <ol id="top"></ol>
@@ -221,7 +252,7 @@ footer .wrap{display:grid;gap:6px}
 const T = {
  en:{tag:"RobotHack 2026 · challenge PCH4 for Rīgas pašvaldība",title:"Hazardous sidewalks of Riga",lead:"Cameras on city vehicles → neural network → where to send crews first, what is coming tonight, and whether the cleaning was really done.",
   tLoading:"Loading Riga weather…",tNow:"Riga now (Open-Meteo)",tNone:"Weather unavailable – set it by hand",tHand:"set by hand",tManual:"What if the temperature were… (demo)",fusedNote:"Photo analysed by the neural network, then adjusted by the Riga weather forecast for the next hours (ice is often invisible on a photo).",wxIce:"Ice / black ice",wxSlush:"Wet snow / slush",wxSnow:"Snow",wxPeak:"peak at {h}",wxNone:"no risk",wxScen:"scenario: {t} all day",
-  night:{title:"Tonight {a}–{b}",high:"High ice risk",medium:"Possible ice",low:"Low ice risk",snowH:"Fresh snow likely",slushH:"Wet snow likely",detail:"lowest {t} · peak around {h}",actIce:"Order gritting now so crews are there before the morning rush.",actSnow:"Plan snow clearing for early morning.",actNone:"No extra work expected.",wet:"{n} wet sidewalks seen by cameras will freeze below 0 °C.",what:"(what-if temperature)"},qcText:"{n} place(s) still have snow or ice after they were marked as treated – check the contractor.",qc0:"",topTitle:"Top 10: send crews here first",none:"No snow or ice on the sidewalks right now.",live:"live camera",offMap:"Not a cleaning job – saved in the system, not shown on the crews’ map.",edge:"Snow/ice only at the edge – the walking line is clear, not shown on the map.",csv:"Download report (CSV)",reset:"Reset “treated”",treat:"Mark as treated",show:"Show",risk:"risk",
+  night:{title:"Tonight {a}–{b}",high:"High ice risk",medium:"Possible ice",low:"Low ice risk",snowH:"Fresh snow likely",slushH:"Wet snow likely",detail:"lowest {t} · peak around {h}",actIce:"Order gritting now so crews are there before the morning rush.",actSnow:"Plan snow clearing for early morning.",actNone:"No extra work expected.",wet:"{n} wet sidewalks seen by cameras will freeze below 0 °C.",what:"(what-if temperature)"},qcText:"{n} place(s) still have snow or ice after they were marked as treated – check the contractor.",qc0:"",cmTitle:"Camera routes on public transport",cmLead:"Pick bus, trolleybus and tram routes that would carry a camera. The map shows which streets they cover and how often a vehicle passes in the morning (6–9).",cmBest:"Suggest best 5",cmNone:"Clear",cmSrc:"Data: Rīgas satiksme timetables (GTFS), data.gov.lv, CC0.",cmInfo:"{r} routes · cover about {km} km of streets · {f} km of them get a vehicle at least every 15 min in the morning · {h} of the current places to clean are on these routes",cmEvery:"every {m} min",cmNo:"no morning trips",tt:{bus:"Bus",trolleybus:"Trolleybus",tram:"Tram"},rtTitle:"Crew route",rtTop:"Top 10 places",rtIce:"All ice",rtAll:"All places to clean",rtMe:"start from my location",rtGo:"Plan route",rtNav:"Open in Google Maps",rtClear:"Clear",rtInfo:"{n} stops · about {km} km · about {min} min driving (estimate)",rtNone:"No places to clean right now.",rtNavNote:"Google Maps takes the first 10 stops.",topTitle:"Top 10: send crews here first",none:"No snow or ice on the sidewalks right now.",live:"live camera",offMap:"Not a cleaning job – saved in the system, not shown on the crews’ map.",edge:"Snow/ice only at the edge – the walking line is clear, not shown on the map.",csv:"Download report (CSV)",reset:"Reset “treated”",treat:"Mark as treated",show:"Show",risk:"risk",
   checkTitle:"Try the model",checkP1:"This is a demo of our neural network. Upload any sidewalk photo and see what it finds. The model runs right here in your browser – the photo is not sent anywhere.",checkP2:"In real use, photos come only from cameras on city vehicles, and the map is available only to the city and its contractors. Only snow, wet snow and ice in the middle of the sidewalk go on the map.",
   drop:"Choose or drop a photo",roi:"Wide frame from a vehicle: look only at the sidewalk in front (bottom centre)",
   mLoad:"Loading the model (6 MB) …",mRun:"Classifying…",mErr:"The model could not load. Check the connection and try again.",
@@ -238,7 +269,7 @@ const T = {
   cols:["id","lat","lon","photo date","class","confidence","risk","level","reasons","treated at"]},
  lv:{tag:"RobotHack 2026 · izaicinājums PCH4 Rīgas pašvaldībai",title:"Bīstamās Rīgas ietves",lead:"Kameras uz pilsētas transporta → neironu tīkls → kur sūtīt brigādes vispirms, kas gaidāms šonakt un vai tīrīšana tiešām ir paveikta.",
   tLoading:"Ielādēju Rīgas laikapstākļus…",tNow:"Rīgā tagad (Open-Meteo)",tNone:"Laikapstākļi nav pieejami – iestati manuāli",tHand:"iestatīts manuāli",tManual:"Ja temperatūra būtu… (demo)",fusedNote:"Foto analizē neironu tīkls, pēc tam rezultātu precizē Rīgas laikapstākļu prognoze nākamajām stundām (ledus fotogrāfijā bieži nav redzams).",wxIce:"Apledojums / melnais ledus",wxSlush:"Slapjš sniegs / šķīdonis",wxSnow:"Sniegs",wxPeak:"maksimums {h}",wxNone:"nav riska",wxScen:"scenārijs: {t} visu dienu",
-  night:{title:"Šonakt {a}–{b}",high:"Augsts apledojuma risks",medium:"Iespējams apledojums",low:"Zems apledojuma risks",snowH:"Gaidāms svaigs sniegs",slushH:"Gaidāms slapjš sniegs",detail:"zemākā {t} · maksimums ap {h}",actIce:"Pasūti kaisīšanu jau tagad, lai brigādes paspēj līdz rīta sastrēgumam.",actSnow:"Plāno sniega tīrīšanu agri no rīta.",actNone:"Papildu darbi nav gaidāmi.",wet:"{n} slapjas ietves, ko redz kameras, zem 0 °C sasals.",what:"(“ja nu” temperatūra)"},qcText:"{n} vietā(s) joprojām ir sniegs vai ledus pēc atzīmes “apstrādāts” – pārbaudi darbuzņēmēju.",qc0:"",topTitle:"Top 10: kur sūtīt brigādes vispirms",none:"Pašlaik uz ietvēm nav sniega vai ledus.",live:"tiešraides kamera",offMap:"Nav tīrīšanas darbs – saglabāts sistēmā, brigāžu kartē netiek rādīts.",edge:"Sniegs/ledus tikai malā – gājēju josla tīra, kartē netiek rādīts.",csv:"Lejupielādēt atskaiti (CSV)",reset:"Atiestatīt “apstrādāts”",treat:"Atzīmēt kā apstrādātu",show:"Rādīt",risk:"risks",
+  night:{title:"Šonakt {a}–{b}",high:"Augsts apledojuma risks",medium:"Iespējams apledojums",low:"Zems apledojuma risks",snowH:"Gaidāms svaigs sniegs",slushH:"Gaidāms slapjš sniegs",detail:"zemākā {t} · maksimums ap {h}",actIce:"Pasūti kaisīšanu jau tagad, lai brigādes paspēj līdz rīta sastrēgumam.",actSnow:"Plāno sniega tīrīšanu agri no rīta.",actNone:"Papildu darbi nav gaidāmi.",wet:"{n} slapjas ietves, ko redz kameras, zem 0 °C sasals.",what:"(“ja nu” temperatūra)"},qcText:"{n} vietā(s) joprojām ir sniegs vai ledus pēc atzīmes “apstrādāts” – pārbaudi darbuzņēmēju.",qc0:"",cmTitle:"Kameru maršruti sabiedriskajā transportā",cmLead:"Izvēlies autobusu, trolejbusu un tramvaju maršrutus, uz kuriem būtu kamera. Karte rāda, kuras ielas tie pārklāj un cik bieži no rīta (6–9) pabrauc transports.",cmBest:"Ieteikt labākos 5",cmNone:"Notīrīt",cmSrc:"Dati: Rīgas satiksmes saraksti (GTFS), data.gov.lv, CC0.",cmInfo:"{r} maršruti · pārklāj ap {km} km ielu · {f} km no tām no rīta transports pabrauc vismaz reizi 15 min · {h} no pašreizējām tīrāmajām vietām ir uz šiem maršrutiem",cmEvery:"ik pēc {m} min",cmNo:"nav rīta reisu",tt:{bus:"Autobuss",trolleybus:"Trolejbuss",tram:"Tramvajs"},rtTitle:"Brigādes maršruts",rtTop:"Top 10 vietas",rtIce:"Viss ledus",rtAll:"Visas tīrāmās vietas",rtMe:"sākt no manas atrašanās vietas",rtGo:"Plānot maršrutu",rtNav:"Atvērt Google Maps",rtClear:"Notīrīt",rtInfo:"{n} pieturas · ap {km} km · ap {min} min braukšanas (aptuveni)",rtNone:"Pašlaik nav tīrāmu vietu.",rtNavNote:"Google Maps ņem pirmās 10 pieturas.",topTitle:"Top 10: kur sūtīt brigādes vispirms",none:"Pašlaik uz ietvēm nav sniega vai ledus.",live:"tiešraides kamera",offMap:"Nav tīrīšanas darbs – saglabāts sistēmā, brigāžu kartē netiek rādīts.",edge:"Sniegs/ledus tikai malā – gājēju josla tīra, kartē netiek rādīts.",csv:"Lejupielādēt atskaiti (CSV)",reset:"Atiestatīt “apstrādāts”",treat:"Atzīmēt kā apstrādātu",show:"Rādīt",risk:"risks",
   checkTitle:"Izmēģini modeli",checkP1:"Šis ir mūsu neironu tīkla demo. Augšupielādē jebkuru ietves fotogrāfiju un apskaties, ko tas atrod. Modelis darbojas tieši tavā pārlūkā – foto netiek nekur sūtīts.",checkP2:"Reālā lietošanā foto nāk tikai no kamerām uz pilsētas transporta, un karte ir pieejama tikai pašvaldībai un tās darbuzņēmējiem. Kartē nonāk tikai sniegs, slapjš sniegs un ledus ietves vidū.",
   drop:"Izvēlies vai ievelc foto",roi:"Plats kadrs no transporta: skatīties tikai uz ietvi priekšā (apakšā centrā)",
   mLoad:"Ielādēju modeli (6 MB) …",mRun:"Klasificēju…",mErr:"Modeli neizdevās ielādēt. Pārbaudi savienojumu un mēģini vēlreiz.",
@@ -395,6 +426,8 @@ function applyLang(){
   document.querySelectorAll("[data-i]").forEach(e=>{const k=e.dataset.i; if(L[k]) e.textContent=L[k]});
   document.querySelectorAll(".lang button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.lang===lang));
   showTemp(); render();
+  if(TR.length){renderCamList();renderCam()}
+  if(document.getElementById("rtInfo").textContent) planRoute();
 }
 document.querySelectorAll(".lang button").forEach(b=>b.onclick=()=>{lang=b.dataset.lang;L=T[lang];store.set("ice_lang",lang);applyLang()});
 
@@ -439,6 +472,87 @@ function render(){
     li.querySelector(".tr").onclick=()=>{treated[p.id]=new Date().toISOString().slice(0,16).replace("T"," ");store.set("ice_treated",treated);if(p.live)markLiveTreated(p);render()};
     ol.appendChild(li)});
 }
+
+// ---------- crew route: order the places to clean (nearest neighbour + 2-opt), draw it, open in Google Maps ----------
+const routeLayer=window.L.layerGroup().addTo(lmap);
+function tourLen(P){let d=0;for(let i=1;i<P.length;i++) d+=dist(P[i-1].lat,P[i-1].lon,P[i].lat,P[i].lon);return d}
+function planTour(start,pts){
+  const left=pts.slice(), tour=[start];
+  while(left.length){const c=tour[tour.length-1];let bi=0,bd=1e18;left.forEach((p,i)=>{const d=dist(c.lat,c.lon,p.lat,p.lon);if(d<bd){bd=d;bi=i}});tour.push(left.splice(bi,1)[0])}
+  let better=true;                                         // 2-opt: untangle crossing legs (start stays first)
+  while(better){better=false;
+    for(let i=1;i<tour.length-2;i++)for(let k=i+1;k<tour.length-1;k++){
+      const a=tour[i-1],b=tour[i],c=tour[k],d=tour[k+1];
+      if(dist(a.lat,a.lon,c.lat,c.lon)+dist(b.lat,b.lon,d.lat,d.lon)<dist(a.lat,a.lon,b.lat,b.lon)+dist(c.lat,c.lon,d.lat,d.lon)-1){tour.splice(i,k-i+1,...tour.slice(i,k+1).reverse());better=true}}}
+  return tour;
+}
+function routeTargets(){
+  const set=document.getElementById("rtSet").value;
+  let P=points.filter(p=>["ice","slush","snow"].includes(p.level)&&isFinite(p.lat));
+  if(set==="ice") P=P.filter(p=>p.level==="ice");
+  P.sort((a,b)=>b.score-a.score);
+  return set==="top"?P.slice(0,10):P;
+}
+function getMe(){return new Promise(ok=>{if(!navigator.geolocation) return ok(null);navigator.geolocation.getCurrentPosition(p=>ok({lat:p.coords.latitude,lon:p.coords.longitude,me:true}),()=>ok(null),{timeout:8000})})}
+async function planRoute(){
+  const info=document.getElementById("rtInfo"); routeLayer.clearLayers();
+  const T=routeTargets(); if(!T.length){info.textContent=L.rtNone;return}
+  let start=document.getElementById("rtMe").checked?await getMe():null;
+  const tour=start?planTour(start,T):planTour(T[0],T.slice(1));
+  const km=tourLen(tour)*1.35/1000, min=Math.round(km/20*60+tour.filter(p=>!p.me).length*3);   // ~20 km/h in town + 3 min per stop
+  window.L.polyline(tour.map(p=>[p.lat,p.lon]),{color:"#17222B",weight:3,dashArray:"6 6",opacity:.85}).addTo(routeLayer);
+  let n=0; tour.forEach(p=>{ if(p.me) return; n++;
+    window.L.marker([p.lat,p.lon],{icon:window.L.divIcon({className:"",html:`<div class="rnum">${n}</div>`,iconSize:[24,24],iconAnchor:[12,12]}),zIndexOffset:1000}).addTo(routeLayer)});
+  const stops=tour.map(p=>`${p.lat.toFixed(6)},${p.lon.toFixed(6)}`).slice(0,11);
+  const url="https://www.google.com/maps/dir/?api=1&travelmode=driving&origin="+stops[0]+"&destination="+stops[stops.length-1]+(stops.length>2?"&waypoints="+encodeURIComponent(stops.slice(1,-1).join("|")):"");
+  const nav=document.getElementById("rtNav"); nav.href=url; nav.hidden=false; document.getElementById("rtClear").hidden=false;
+  info.textContent=L.rtInfo.replace("{n}",n).replace("{km}",km.toFixed(1)).replace("{min}",min)+(tour.length>11?" · "+L.rtNavNote:"");
+  lmap.fitBounds(window.L.latLngBounds(tour.map(p=>[p.lat,p.lon])).pad(0.15));
+}
+document.getElementById("rtGo").onclick=planRoute;
+document.getElementById("rtClear").onclick=()=>{routeLayer.clearLayers();document.getElementById("rtNav").hidden=true;document.getElementById("rtClear").hidden=true;document.getElementById("rtInfo").textContent=""};
+
+// ---------- camera routes on public transport (Rīgas satiksme GTFS) ----------
+let TR=[], camSel=new Set(); const camLayer=window.L.layerGroup().addTo(lmap);
+const CELL=(lat,lon)=>Math.round(lat/0.0009)+":"+Math.round(lon/0.0016);           // ~100 x 100 m cells
+function cellsOf(r){ if(r._cells) return r._cells; const m=new Map();
+  r.L.forEach(line=>{for(let i=1;i<line.length;i++){const [a,b]=line[i-1],[c,d]=line[i];const n=Math.max(1,Math.ceil(dist(a,b,c,d)/50));
+    for(let k=0;k<=n;k++){const la=a+(c-a)*k/n,lo=b+(d-b)*k/n;m.set(CELL(la,lo),[la,lo])}}});
+  return r._cells=m;}
+function camStats(sel){
+  const best=new Map(), pos=new Map();
+  sel.forEach(r=>{const hw=r.hw||999; cellsOf(r).forEach((p,c)=>{pos.set(c,p); if(!best.has(c)||best.get(c)>hw) best.set(c,hw)})});
+  const km=best.size*0.1, fast=[...best.values()].filter(h=>h<=15).length*0.1;
+  const haz=points.filter(p=>["ice","slush","snow"].includes(p.level)&&isFinite(p.lat)&&best.has(CELL(p.lat,p.lon))).length;
+  return {km,fast,haz,best};
+}
+function renderCam(){
+  camLayer.clearLayers(); const sel=TR.filter(r=>camSel.has(r.id));
+  sel.forEach(r=>r.L.forEach(line=>window.L.polyline(line,{color:r.c==="#000000"?"#4A5866":r.c,weight:4,opacity:.75}).bindTooltip(`${L.tt[r.t]} ${r.n}`).addTo(camLayer)));
+  const info=document.getElementById("cmInfo");
+  if(!sel.length){info.textContent="";return}
+  const st=camStats(sel);
+  info.textContent=L.cmInfo.replace("{r}",sel.length).replace("{km}",Math.round(st.km)).replace("{f}",Math.round(st.fast)).replace("{h}",st.haz);
+}
+function renderCamList(){
+  const box=document.getElementById("cmList"); box.innerHTML="";
+  ["tram","trolleybus","bus"].forEach(t=>{ const R=TR.filter(r=>r.t===t); if(!R.length) return;
+    const h=document.createElement("div"); h.className="cmhead"; h.textContent=L.tt[t]; box.appendChild(h);
+    R.forEach(r=>{const l=document.createElement("label");
+      l.innerHTML=`<input type="checkbox" ${camSel.has(r.id)?"checked":""}><i class="sw" style="background:${r.c==="#000000"?"#4A5866":r.c}"></i>${esc(r.n)} <small>${r.hw?esc(L.cmEvery.replace("{m}",Math.round(r.hw))):esc(L.cmNo)} · ${r.km} km</small>`;
+      l.querySelector("input").onchange=e=>{e.target.checked?camSel.add(r.id):camSel.delete(r.id);renderCam()}; box.appendChild(l)})});
+}
+// greedy: each step take the route that adds the most new street cells, counting frequent service (<=15 min) double
+document.getElementById("cmBest").onclick=()=>{
+  camSel=new Set(); const covered=new Set();
+  for(let k=0;k<5;k++){let bestR=null,bestG=0;
+    TR.forEach(r=>{ if(camSel.has(r.id)||!r.hw) return; let g=0; cellsOf(r).forEach((p,c)=>{if(!covered.has(c)) g+=r.hw<=15?2:1}); if(g>bestG){bestG=g;bestR=r}});
+    if(!bestR) break; camSel.add(bestR.id); cellsOf(bestR).forEach((p,c)=>covered.add(c))}
+  renderCamList(); renderCam(); lmap.setView([56.9496,24.1052],12);
+};
+document.getElementById("cmNone").onclick=()=>{camSel=new Set();renderCamList();renderCam()};
+document.getElementById("camBox").addEventListener("toggle",e=>{ if(e.target.open&&!TR.length)
+  fetch("transport_routes.json",{cache:"no-cache"}).then(r=>r.json()).then(d=>{TR=d.routes;renderCamList()}) });
 document.getElementById("reset").onclick=()=>{treated={};store.set("ice_treated",treated);render()};
 document.getElementById("csv").onclick=()=>{
   const q=v=>`"${String(v??"").replace(/"/g,'""')}"`;
