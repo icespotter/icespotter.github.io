@@ -442,8 +442,6 @@ function renderNight(){
   let ice=0.05,snow=0,slush=0,peak=null,tmin=99;
   for(let i=a;i<=b&&i<h.t.length;i++){const r=hourRisk(h,i,Tover);if(r.ice>ice){ice=r.ice;peak=h.time[i].slice(11,16)}snow=Math.max(snow,r.snow);slush=Math.max(slush,r.slush);tmin=Math.min(tmin,Tover??h.t[i])}
   // wet sidewalks the cameras already see will freeze if the night goes below 0 °C
-  const wetN=tmin<=0?points.filter(p=>!treated[p.id]&&p.p&&argmax(p.p)==="wet").length:0;
-  if(wetN>0) ice=Math.max(ice,wetN>=10?0.6:0.3);
   const N=L.night, lvl=ice>=0.6?"high":(ice>=0.3?"medium":"low");
   const col=lvl==="high"?COLOR.ice:(lvl==="medium"?COLOR.slush:(snow>=0.5||slush>=0.5?COLOR.snow:COLOR.treated));
   const extra=snow>=0.5?N.snowH:(slush>=0.5?N.slushH:"");
@@ -452,7 +450,6 @@ function renderNight(){
   el.innerHTML=`<span class="d">${esc(N.title.replace("{a}",h.time[a].slice(11,16)).replace("{b}","08:00"))}${manual?" "+esc(N.what):""}</span>
     <span class="h">${esc(N[lvl])}${extra?" · "+esc(extra):""}</span>
     <span class="d">${esc(peak?N.detail.replace("{t}",fmtT(tmin)).replace("{h}",peak):N.detail.split(" · ")[0].replace("{t}",fmtT(tmin)))}</span>
-    ${wetN?`<span class="d">${esc(N.wet.replace("{n}",wetN))}</span>`:""}
     <span class="a">${esc(act)}</span>`;
   el.hidden=false;
 }
