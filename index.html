@@ -689,10 +689,13 @@ function along(path,d){let acc=0;for(let i=1;i<path.length;i++){const [a,b]=path
   const [a,b]=path[path.length-1];return {lat:a,lon:b,dl:0,dn:0}}
 async function startDemo(){
   if(!TR.length){try{TR=(await fetch("transport_routes.json").then(r=>r.json())).routes}catch(e){}}
-  const r=TR.find(x=>x.t==="bus"&&x.n==="22")||TR[0]; if(!r) return;
-  const path=slicePath(r.L[0],250,4200);
+  // drive along real streets: Brīvības iela from the Freedom Monument to the VEF area (OSRM), fallback = bus 22 line
+  const WP=[[56.9514,24.1133],[56.9586,24.1245],[56.9643,24.1343],[56.9705,24.1453],[56.9748,24.1530]];
+  const sr=await streetRoute(WP.map(([lat,lon])=>({lat,lon})));
+  let path=sr?sr.line:null;
+  if(!path){const r=TR.find(x=>x.t==="bus"&&x.n==="22")||TR[0]; if(!r) return; path=slicePath(r.L[0],250,4200)}
   demo={pts:[],layer:window.L.layerGroup().addTo(lmap),run:true}; demoLabel(); routeLayer.clearLayers();
-  window.L.polyline(path,{color:"#062645",weight:5,opacity:.45}).addTo(demo.layer);
+  window.L.polyline(path,{color:"#062645",weight:6,opacity:.55}).addTo(demo.layer);
   lmap.fitBounds(window.L.latLngBounds(path).pad(0.12));
   const veh=window.L.marker(path[0],{icon:window.L.divIcon({className:"",html:'<div class="veh"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></div>',iconSize:[34,34],iconAnchor:[17,17]}),zIndexOffset:2000}).addTo(demo.layer);
   const thumbsBy=c=>points.filter(p=>!p.demo&&p.cls===c&&p.thumb&&p.thumb.startsWith("thumbs/")).map(p=>p.thumb);
@@ -700,10 +703,10 @@ async function startDemo(){
   const SEQ=["snow","clear","ice","snow","snow","clear","ice","snow","ice","clear","snow","ice","snow","snow"];
   const P=(c)=>c==="ice"?{ice:.88,wet:.08,snow:.03,clear:.01,blocked:0,not_visible:0}:c==="snow"?{snow:.9,wet:.06,clear:.03,ice:.01,blocked:0,not_visible:0}:{clear:.93,wet:.05,snow:.01,ice:.01,blocked:0,not_visible:0};
   demoBanner("demo1");
-  const total=4200, steps=140; let k=0, next=200;
+  const total=Math.min(4200,tourLen(path.map(([lat,lon])=>({lat,lon})))), steps=140; let k=0, next=200;
   for(let s=0;s<=steps&&demo&&demo.run;s++){
     const d=total*s/steps, q=along(path,d); veh.setLatLng([q.lat,q.lon]);
-    if(d>=next&&k<SEQ.length){ const c=SEQ[k++]; next+=290;
+    if(d>=next&&k<SEQ.length){ const c=SEQ[k++]; next+=total/15;
       const n=Math.hypot(q.dl,q.dn)||1, off=0.00009;                    // put the point on the sidewalk, ~10 m to the right
       const pt={id:"demo-"+k,demo:true,lat:q.lat-q.dn/n*off*0.6,lon:q.lon+q.dl/n*off,cls:c==="ice"?"ice":c,conf:.9,p:P(c),c:P(c),date:nowStr(),
         thumb:(TH[c]||[])[k%Math.max(1,(TH[c]||[]).length)]||""};
