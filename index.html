@@ -693,6 +693,7 @@ async function startDemo(){
   const WP=[[56.9514,24.1133],[56.9806,24.2000]];   // OSRM keeps to Brīvības iela; we drive the first ~4 km
   const sr=await streetRoute(WP.map(([lat,lon])=>({lat,lon})));
   let path=sr?sr.line:null;
+  if(path){let acc=0,i=1;for(;i<path.length&&acc<4200;i++) acc+=dist(path[i-1][0],path[i-1][1],path[i][0],path[i][1]); path=path.slice(0,i)}
   if(!path){const r=TR.find(x=>x.t==="bus"&&x.n==="22")||TR[0]; if(!r) return; path=slicePath(r.L[0],250,4200)}
   demo={pts:[],layer:window.L.layerGroup().addTo(lmap),run:true}; demoLabel(); routeLayer.clearLayers();
   window.L.polyline(path,{color:"#062645",weight:6,opacity:.55}).addTo(demo.layer);
