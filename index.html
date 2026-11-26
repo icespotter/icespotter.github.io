@@ -11,10 +11,11 @@
 <meta property="og:description" content="Cameras on city vehicles → neural network → a map of Riga and a list of where to send crews first.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://icespotter.github.io/">
-<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-64.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"SoftwareApplication","name":"IceSpotter","applicationCategory":"Public safety","operatingSystem":"Web","description":"Winter sidewalk hazard map of Riga built from camera photos and a neural network.","url":"https://icespotter.github.io/"}
@@ -137,59 +138,95 @@ footer .wrap{display:grid;gap:6px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
-/* ===== design by Anna (Figma): deep navy page, light dispatch rail, sky-blue accents ===== */
-:root{--navy:#0C2A4B;--navy2:#123A63;--navy3:#1B4A7A;--sky:#A9D2F5;--pale:#EEF4FA;--mist:#C9D9E8}
-body{background:var(--navy)}
-header{background:var(--navy);border-bottom:1px solid rgba(169,210,245,.18)}
-.brand{align-items:center}
-.brand .logo{width:30px;height:38px;flex:none}
-.brand span{color:var(--mist)}
-.lang{border-color:rgba(169,210,245,.35)}
-.lang button{color:var(--mist)}
-.lang button[aria-pressed=true]{background:var(--sky);color:var(--navy)}
-.hero{border-bottom:0}
-.rail{background:var(--pale);border-right:1px solid #D6E2EE}
-.rail h1{color:var(--navy)}
-.btn.primary{background:var(--navy);border-color:var(--navy);color:#fff}
-.btn.primary:hover{background:var(--navy3)}
-.top .tr{background:var(--navy);border-color:var(--navy);color:#fff}
-.top .tr:hover{background:var(--navy3);color:#fff}
-section.band{background:var(--navy);color:#EAF2FA;border-bottom:1px solid rgba(169,210,245,.14)}
-section.band h2{color:#fff}
-section.band .prose p,section.band .steps{color:var(--mist)}
+/* ===== Design by Anna (Figma "IceSpotter Interface V2"): exact palette and type scale ===== */
+:root{--navy:#062645;--sky:#92CEEE;--steel:#BDD4E5;--pale:#EAF4FB;--white:#FFFFFF;
+  --ink:#062645;--ink2:#5B7186;--line:#D3E2EE;--ice:#C8352B;--slush:#E07B1F;--snowc:#2F65AE;--ok:#2F6B45}
+body{background:var(--navy);color:var(--navy);font:400 16px/1.55 Inter,system-ui,sans-serif}
+h1,h2,h3,h4{font-family:"Barlow Condensed",Inter,sans-serif;font-weight:600;letter-spacing:0}
+/* header: 90px, logo + text links */
+header{background:var(--navy);border:0}
+header .wrap{max-width:1080px;padding:0;height:90px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px}
+.brand .logo{width:36px;height:45px}
+.brand b{font:600 24px/1 "Barlow Condensed",sans-serif;color:#fff;letter-spacing:.2px}
+.brand span{display:none}
+.lang{border:0;gap:24px}
+.lang button{padding:2px 0;color:#fff;font:500 16px Inter,sans-serif;background:none!important;border-bottom:2px solid transparent;border-radius:0}
+.lang button[aria-pressed=true]{color:var(--sky);border-bottom-color:var(--sky)}
+/* hero: 450px rail + map, 630px tall */
+.hero{grid-template-columns:450px 1fr;min-height:630px;height:630px;border:0}
+.rail{background:var(--pale);border:0;padding:26px 40px 26px 36px;gap:14px;max-height:630px;overflow:auto;scrollbar-width:thin;scrollbar-color:var(--navy) transparent}
+.rail::-webkit-scrollbar{width:6px}.rail::-webkit-scrollbar-thumb{background:var(--navy);border-radius:3px}
+#map{min-height:630px;height:630px}
+.rail h1{font-size:60px;line-height:1.08;color:var(--navy);font-weight:600}
+.rail .lead{font-size:16px;line-height:1.55;color:var(--navy);max-width:none;margin-top:10px}
+.temp,.night,.route,.lv,.top li{background:#fff;border:0;border-radius:6px;box-shadow:0 1px 3px rgba(6,38,69,.08)}
+.temp{padding:18px 22px;gap:10px}
+.temp .now{font:600 36px/1 "Barlow Condensed",sans-serif;color:var(--navy)}
+.temp .status,.temp label{color:var(--navy);font-size:14px}
+.temp input[type=range]{-webkit-appearance:none;appearance:none;height:6px;border-radius:3px;background:linear-gradient(to right,var(--navy) var(--fill,60%),var(--steel) var(--fill,60%))}
+.temp input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--navy);border:0}
+.temp input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--navy);border:0}
+.levels{gap:10px}
+.lv{padding:12px 12px 10px}
+.lv .n{font:600 26px/1 "Barlow Condensed",sans-serif;color:var(--navy)}
+.lv .t{font-size:14px;color:var(--navy);margin-top:8px}
+.dot{width:14px;height:14px}
+.top h2{font-size:28px;color:var(--navy);margin-bottom:10px}
+.top li{grid-template-columns:80px 1fr;padding:8px;border-left:4px solid var(--c);gap:10px}
+.top img{width:80px;height:80px;border-radius:6px}
+.top .sc{font:600 16px/1.3 Inter,sans-serif;color:var(--navy)}
+.top .why{font-size:14px;color:var(--ink2)}
+.top .goto{color:var(--navy);font:500 14px Inter,sans-serif}
+.top .tr,.btn.primary{background:var(--navy);border:0;color:#fff;border-radius:4px;font:500 14px Inter,sans-serif;padding:6px 10px}
+.top .tr{float:right}
+.top .tr:hover,.btn.primary:hover{background:#0E3A66;color:#fff}
+.btn{font:500 14px Inter,sans-serif;border-radius:4px;border-color:var(--navy);color:var(--navy)}
+.night{border-left:4px solid var(--nc,var(--ok));padding:14px 18px}
+.night .h{font:600 24px/1.1 "Barlow Condensed",sans-serif;color:var(--navy)}
+.route{padding:16px 18px}.route h3{font-size:24px;color:var(--navy)}
+.qc{border-radius:6px}
+.status{color:var(--ink2)}
+/* map controls & popup */
+.leaflet-bar a{color:var(--navy)}
+.leaflet-popup-content-wrapper{border-radius:6px}
+.leaflet-popup-content{font:14px/1.45 Inter,sans-serif;color:var(--navy)}
+/* sections */
+.wrap{max-width:1080px;padding:0}
+section.band{background:var(--navy);color:#fff;padding:80px 0 60px;border-bottom:1px solid rgba(189,212,229,.18)}
+section.band h2{font-size:48px;color:#fff;margin-bottom:28px}
+section.band .prose p,section.band .steps{color:#fff;font-size:16px;line-height:1.55}
+section.band .status{color:var(--steel)}
 section.band a{color:var(--sky)}
-section.band .status{color:var(--mist)}
-.check{background:transparent;border:0;padding:0}
-.drop{background:linear-gradient(180deg,var(--navy3),var(--navy2));border:1px dashed rgba(169,210,245,.55);color:#EAF2FA;border-radius:12px;padding:34px}
+.cols{grid-template-columns:1fr 1fr;gap:64px}
+.check{background:transparent;border:1px solid rgba(189,212,229,.35);border-radius:16px;padding:30px;gap:16px}
+.drop{background:linear-gradient(180deg,#16395E 0%,#0B2D52 100%);border:1.5px dashed rgba(146,206,238,.65);border-radius:10px;padding:46px 20px;color:#fff;font:600 24px/1.2 Inter,sans-serif}
 .drop:hover,.drop:focus-within{border-color:var(--sky)}
-.check label{color:var(--mist)}
-#result{background:#fff;color:var(--ink);border-radius:12px}
+.check label{color:var(--steel);font-size:16px;justify-content:center}
+#result{background:#fff;color:var(--navy);border-radius:10px}
 #result:not(:empty){padding:14px}
 #result .status{color:var(--ink2)}
-.facts div{border-top-color:var(--sky)}
-.facts b{color:#fff}
-.facts span{color:var(--mist)}
-footer{background:var(--navy);color:var(--mist)}
-footer a{color:var(--sky)}
-
-/* layout like the Figma: centred content column, framed photo box, quiet header */
-.wrap{max-width:1160px;padding:0 32px}
-header .wrap{padding-top:12px;padding-bottom:12px}
-.brand b{font-size:24px}
-.brand span{display:none}
-section.band{padding:72px 0}
-.cols{gap:64px}
-.check{border:1px solid rgba(169,210,245,.22);border-radius:14px;padding:22px;background:rgba(255,255,255,.03)}
-.drop{padding:40px 20px}
-footer{border-top:1px solid rgba(169,210,245,.14)}
-.rail{gap:16px}
-.top li{background:#fff}
+.facts{gap:28px}
+.facts div{border-top:2px solid var(--sky);padding-top:18px}
+.facts b{font:600 48px/1 "Barlow Condensed",sans-serif;color:#fff;margin-bottom:14px}
+.facts span{color:var(--pale);font-size:16px;line-height:1.55}
+footer{background:var(--navy);color:#fff;font-size:14px;border-top:1px solid rgba(189,212,229,.18);padding:28px 0 36px}
+footer a{color:#fff;text-decoration:underline}
+@media (max-width:1140px){header .wrap,.wrap{padding-left:24px;padding-right:24px}}
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr;height:auto}
+  .rail{max-height:none;padding:24px}
+  #map{height:420px;min-height:420px}
+  .rail h1{font-size:44px}
+  .cols{grid-template-columns:1fr;gap:32px}
+  section.band h2{font-size:36px}
+}
 </style>
 </head>
 <body>
 <header>
   <div class="wrap">
-    <div class="brand"><svg class="logo" viewBox="0 0 64 80" aria-hidden="true"><path d="M32 3C16.5 3 4 15.3 4 30.6c0 19.6 23.4 42.4 26.1 45a2.7 2.7 0 0 0 3.8 0C36.6 73 60 50.2 60 30.6 60 15.3 47.5 3 32 3z" fill="#0C2A4B" stroke="#fff" stroke-width="4"/><g stroke="#fff" stroke-width="3.2" stroke-linecap="round" fill="none"><path d="M32 14v34M17.3 22.5l29.4 17M17.3 39.5l29.4-17"/><path d="M27 17l5 4 5-4M27 45l5-4 5 4M18 29l6 1-2 5M46 33l-6-1 2-5M18 33l6-1-2-5M46 29l-6 1 2 5"/></g></svg><b>IceSpotter</b><span data-i="tag">RobotHack 2026 · challenge PCH4 for Rīgas pašvaldība</span></div>
+    <div class="brand"><svg class="logo" viewBox="0 0 64 80" aria-hidden="true"><path d="M32 3C16.5 3 4 15.3 4 30.6c0 9.8 5.9 20.6 13.5 30.2C23.6 68.5 32 76.8 32 76.8s8.4-8.3 14.5-16C54.1 51.2 60 40.4 60 30.6 60 15.3 47.5 3 32 3z" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><g stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"><g transform="rotate(0 32 30)"><path d="M32 30V14M27 17l5 5 5-5"/></g><g transform="rotate(60 32 30)"><path d="M32 30V14M27 17l5 5 5-5"/></g><g transform="rotate(120 32 30)"><path d="M32 30V14M27 17l5 5 5-5"/></g><g transform="rotate(180 32 30)"><path d="M32 30V14M27 17l5 5 5-5"/></g><g transform="rotate(240 32 30)"><path d="M32 30V14M27 17l5 5 5-5"/></g><g transform="rotate(300 32 30)"><path d="M32 30V14M27 17l5 5 5-5"/></g></g></svg><b>IceSpotter</b><span data-i="tag">RobotHack 2026 · challenge PCH4 for Rīgas pašvaldība</span></div>
     <div class="lang" role="group" aria-label="Language">
       <button type="button" data-lang="en" aria-pressed="true">English</button>
       <button type="button" data-lang="lv" aria-pressed="false">Latviešu</button>
@@ -336,7 +373,7 @@ const T = {
 // The map is for snow-clearing crews: only snow, wet snow (slush) and ice in the middle of the sidewalk.
 // Everything else (dry, wet, blocked, not visible, hazards only at the edge) stays in the system and the CSV report.
 const LV_ORDER=["ice","slush","snow","treated"];
-const COLOR={ice:"#C3352B",slush:"#DD7A1C",snow:"#3A78B8",treated:"#2B6B44",none:"#8C98A3",high:"#C3352B",blocked:"#7A4FA3",clear:"#3D8A57",hidden:"#8C98A3"};
+const COLOR={ice:"#C8352B",slush:"#E07B1F",snow:"#2F65AE",treated:"#2F6B45",none:"#8C98A3",high:"#C3352B",blocked:"#7A4FA3",clear:"#3D8A57",hidden:"#8C98A3"};
 const CLASS_RISK={ice:100,blocked:80,snow:60,wet:30,clear:0,not_visible:null};
 const BRIDGES={"Akmens tilts":[56.9466,24.0975],"Vanšu tilts":[56.9565,24.0905],"Salu tilts":[56.9395,24.1295],"Dzelzceļa tilts":[56.9420,24.1080]};
 let CLASSES=["clear","ice","not_visible","snow","wet"];   // replaced by model/classes.json
@@ -483,6 +520,8 @@ function showTemp(){
   const manual=document.getElementById("tManual").checked;
   document.getElementById("tNow").textContent=airT==null?"–":fmtT(airT);
   document.getElementById("tSrc").textContent=manual?L.tHand:(apiT==null?L.tNone:L.tNow);
+  const sl=document.getElementById("tSlider"); if(!manual&&airT!=null) sl.value=airT;
+  sl.style.setProperty("--fill",((+sl.value-(+sl.min))/((+sl.max)-(+sl.min))*100)+"%");
 }
 document.getElementById("tManual").onchange=e=>{const s=document.getElementById("tSlider");s.disabled=!e.target.checked;airT=e.target.checked?+s.value:apiT;showTemp();render()};
 document.getElementById("tSlider").oninput=e=>{airT=+e.target.value;showTemp();render()};
