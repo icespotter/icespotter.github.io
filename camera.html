@@ -74,7 +74,7 @@ async function getSession(){
   await loadLib("https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.min.js");
   ort.env.wasm.wasmPaths="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/";
   CLASSES=await fetch("model/classes.json",{cache:"no-cache"}).then(r=>r.json());
-  session=await ort.InferenceSession.create("model/icespotter_v5.onnx",{executionProviders:["wasm"]});
+  session=await ort.InferenceSession.create("model/icespotter_v6.onnx",{executionProviders:["wasm"]});
   return session;
 }
 // same preprocessing as the site and the server: thumbnail to 320, shortest side to 224, centre crop
