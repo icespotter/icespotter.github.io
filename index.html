@@ -564,7 +564,7 @@ function render(){
     m.on("mouseover",()=>{m.setRadius(r0*1.7);m.setStyle({weight:2.5});m.bringToFront()});
     m.on("mouseout",()=>{m.setRadius(r0);m.setStyle({weight:1.5})});
     const why=p.rs.map(([c,pr])=>"• "+esc(rtext(c,pr))).join("<br>");
-    m.bindPopup(`<b>${esc(L.levels[p.level])}</b>${p.score!=null?` · ${L.risk} ${p.score}`:""}<br>${why}${p.thumb?`<img src="${p.thumb}" alt="">`:""}<br><small>${p.live?"📷 "+esc(L.live)+" · ":""}${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}${p.date?" · "+esc(p.date):""}</small>`);
+    m.bindPopup(`<b>${esc(L.levels[p.level])}</b>${p.score!=null?` · ${L.risk} ${p.score}`:""}<br>${why}${p.thumb?`<img src="${p.thumb}" alt="">`:""}<br><small>${p.live?"📷 "+esc(L.live)+" · ":""}${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}${p.date?" · "+esc(p.date):""}</small>${(!treated[p.id]&&["ice","slush","snow"].includes(p.level))?`<br><button type="button" class="btn primary poptr" data-id="${esc(p.id)}" style="margin-top:8px">${esc(L.treat)}</button>`:""}`);
     m.addTo(layer); markers[p.id]=m });
   // top 10
   const top=points.filter(p=>HAZ.includes(hazardKind(p))&&p.level!=="treated").sort((a,b)=>b.score-a.score).slice(0,10);
@@ -575,7 +575,7 @@ function render(){
     li.innerHTML=`<img src="${p.thumb}" alt="" loading="lazy"><div><div class="sc">${i+1}. ${esc(L.levels[p.level])} · ${L.risk} ${p.score}</div><div class="why">${esc(L.classes[p.cls])} ${Math.round(p.conf*100)}%${why?" · "+esc(why):""}</div>
       <button type="button" class="goto">${esc(L.show)}</button> <button type="button" class="tr">${esc(L.treat)}</button></div>`;
     li.querySelector(".goto").onclick=()=>{lmap.setView([p.lat,p.lon],17);markers[p.id]&&markers[p.id].openPopup();mapEl.scrollIntoView({behavior:"smooth",block:"center"})};
-    li.querySelector(".tr").onclick=()=>{treated[p.id]=new Date().toISOString().slice(0,16).replace("T"," ");store.set("ice_treated",treated);if(p.live)markLiveTreated(p);render()};
+    li.querySelector(".tr").onclick=()=>markTreated(p);
     ol.appendChild(li)});
 }
 
@@ -749,6 +749,8 @@ const SB_URL="https://vilvnqmsqdzsrdrvdfwl.supabase.co", SB_KEY="sb_publishable_
 const SB_H={apikey:SB_KEY,Authorization:"Bearer "+SB_KEY,"Content-Type":"application/json"};
 const THUMB_OK=/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/;
 let liveSeen=new Set(), liveFirst=true;
+function markTreated(p){treated[p.id]=new Date().toISOString().slice(0,16).replace("T"," ");store.set("ice_treated",treated);if(p.live)markLiveTreated(p);lmap.closePopup();render()}
+document.addEventListener("click",e=>{const b=e.target.closest(".poptr"); if(!b) return; const p=points.find(q=>String(q.id)===b.dataset.id); if(p) markTreated(p)});
 function rigaMidnight(){const now=new Date(), d=now.toLocaleDateString("en-CA",{timeZone:"Europe/Riga"});
   const off=new Date(now.toLocaleString("en-US",{timeZone:"Europe/Riga"}))-new Date(now.toLocaleString("en-US",{timeZone:"UTC"}));
   return new Date(new Date(d+"T00:00:00Z").getTime()-off)}
