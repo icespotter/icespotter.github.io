@@ -495,7 +495,7 @@ function score(p){
   const b=bridge(p); if(b){s+=15*Math.max(W.iceNow,q.ice,q.wet>0.3?0.5:0);rs.push(["bridge",{name:b}])}
   const st=nearStop(p); if(st&&q.ice+q.snow>=0.3){s+=15;rs.push(["stop",{name:st}])}
   if(p.overdue&&q.ice+q.snow>=0.3){s+=20;rs.push(["overdue",{}])}
-  const rc=recheckOf(p); if(rc&&HAZ.includes(hazardKind(p))){s+=20;rs.push(["recheck",{v:rc}])}
+  const rc=recheckOf(p); if(rc&&hazardKind(p)!=="none"){s+=20;rs.push(["recheck",{v:rc}])}
   if(p.conf<0.6) rs.push(["low_conf",{}]);
   return [Math.round(s),rs];
 }
@@ -570,7 +570,7 @@ function render(){
     m.bindPopup(`<b>${esc(L.levels[p.level])}</b>${p.score!=null?` · ${L.risk} ${p.score}`:""}<br>${why}${p.thumb?`<img src="${p.thumb}" alt="">`:""}<br><small>${p.live?"📷 "+esc(L.live)+" · ":""}${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}${p.date?" · "+esc(p.date):""}</small>${(!treated[p.id]&&["ice","slush","snow"].includes(p.level))?`<br><button type="button" class="btn primary poptr" data-id="${esc(p.id)}" style="margin-top:8px">${esc(L.treat)}</button>`:""}`);
     m.addTo(layer); markers[p.id]=m });
   // full list, most dangerous first; shown 10 at a time
-  const all=points.filter(p=>HAZ.includes(hazardKind(p))&&p.level!=="treated").sort((a,b)=>b.score-a.score), top=all.slice(0,topShown);
+  const all=points.filter(p=>hazardKind(p)!=="none"&&p.level!=="treated").sort((a,b)=>b.score-a.score), top=all.slice(0,topShown);
   document.getElementById("topN").textContent=all.length?L.allN.replace("{n}",all.length):"";
   const more=document.getElementById("topMore"); more.hidden=all.length<=top.length; more.textContent=L.more.replace("{n}",all.length-top.length);
   const ol=document.getElementById("top"); ol.innerHTML="";
