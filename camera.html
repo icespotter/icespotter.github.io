@@ -32,6 +32,7 @@ button.go[aria-pressed=true]{background:var(--ice);color:#fff}
 button.go:focus-visible{outline:3px solid #7FB2F0;outline-offset:3px}
 .status{font-size:14px;color:var(--dim);min-height:1.4em}
 .row{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--dim)}
+.row input{width:22px;height:22px;accent-color:#7FB2F0}
 .row select{background:#22303B;color:var(--paper);border:0;border-radius:6px;padding:4px 8px;font:inherit}
 </style>
 </head>
@@ -51,6 +52,7 @@ button.go:focus-visible{outline:3px solid #7FB2F0;outline-offset:3px}
     </div>
     <div class="row"><span>Frame every</span>
       <select id="every"><option value="2000">2 s</option><option value="3000" selected>3 s</option><option value="5000">5 s</option></select></div>
+    <div class="row"><label for="demoLoc">Indoor demo (no GPS): place points at RTU, Ķīpsala</label><input type="checkbox" id="demoLoc"></div>
     <button class="go" id="go" type="button" aria-pressed="false">Start</button>
     <div class="status" id="st" aria-live="polite">Point the camera at the sidewalk in front of you and press Start.</div>
   </div>
@@ -96,6 +98,8 @@ function thumb(v){const W=v.videoWidth,H=v.videoHeight,sy=Math.round(H*0.45),sh=
 function brightness(v){const c=document.createElement("canvas");c.width=64;c.height=36;const g=c.getContext("2d");
   g.drawImage(v,0,v.videoHeight*0.45,v.videoWidth,v.videoHeight*0.55,0,0,64,36);const d=g.getImageData(0,0,64,36).data;let s=0;
   for(let i=0;i<d.length;i+=4) s+=.299*d[i]+.587*d[i+1]+.114*d[i+2]; return s/(d.length/4)}
+const DEMO_AT=[56.9531,24.0808];
+const demoLoc=()=>$("demoLoc").checked;
 const MIN_LIGHT=40, MIN_CONF=0.6;
 function dist(a,b,c,d){const r=6371000,p1=a*Math.PI/180,p2=c*Math.PI/180,dl=(d-b)*Math.PI/180;return 2*r*Math.asin(Math.sqrt(Math.sin((p2-p1)/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2))}
 
@@ -111,12 +115,14 @@ async function shot(){
     else if(light<MIN_LIGHT) note="too dark – not sent";
     else if(conf<MIN_CONF) note="not sure ("+Math.round(conf*100)+"%) – not sent";
     else if((cls==="snow"||cls==="ice")&&(C.ice+C.snow)<0.3) note="only at the edge – not sent";
-    else if(!pos) note="waiting for GPS";
-    else if(last&&last.cls===cls&&dist(last.lat,last.lon,pos.lat,pos.lon)<8) note="same place";
+    else if(!demoLoc()&&!pos) note="waiting for GPS";
+    else if(!demoLoc()&&last&&last.cls===cls&&dist(last.lat,last.lon,pos.lat,pos.lon)<8) note="same place";
+    else if(demoLoc()&&last&&last.cls===cls&&Date.now()-last.t<15000) note="sent a moment ago";
     else{
-      const body={lat:pos.lat,lon:pos.lon,cls,conf:+conf.toFixed(3),p:P,c:C,thumb:thumb(v),device:"camera-demo"};
+      const here=demoLoc()?{lat:DEMO_AT[0]+(Math.random()-0.5)*0.0005,lon:DEMO_AT[1]+(Math.random()-0.5)*0.0008}:pos;
+      const body={lat:here.lat,lon:here.lon,cls,conf:+conf.toFixed(3),p:P,c:C,thumb:thumb(v),device:"camera-demo"};
       const r=await fetch(SB_URL+"/rest/v1/reports",{method:"POST",headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY,"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify(body)});
-      if(r.ok){nSent++;$("nSent").textContent=nSent;last={cls,lat:pos.lat,lon:pos.lon};note="sent to map ✓"}
+      if(r.ok){nSent++;$("nSent").textContent=nSent;last={cls,lat:here.lat,lon:here.lon,t:Date.now()};note="sent to map ✓"}
       else note="send failed ("+r.status+")";
     }
     $("rSent").textContent=note;
@@ -145,6 +151,7 @@ function stop(){
   $("go").textContent="Start";$("go").setAttribute("aria-pressed","false");
 }
 $("go").onclick=()=>timer?(stop(),st("Stopped.")):start();
+if(new URLSearchParams(location.search).has("demo")) $("demoLoc").checked=true;
 $("every").onchange=()=>{if(timer){clearInterval(timer);timer=setInterval(shot,+$("every").value)}};
 document.addEventListener("visibilitychange",async()=>{if(timer&&document.visibilityState==="visible"){try{lock=await navigator.wakeLock?.request("screen")}catch(e){}}});
 </script>

@@ -324,7 +324,7 @@ section.band h2{font-size:40px}
     <div>
       <div class="facts">
         <div><b>91%</b><span data-i="f1">of snow found on 682 hand-labelled Riga photos the model never saw, only 1% false alarms (4-fold check)</span></div>
-        <div><b>700</b><span data-i="f2">winter street photos of Riga collected, about 600 labelled by hand</span></div>
+        <div><b>682</b><span data-i="f2">winter street photos of Riga labelled by hand, plus open datasets of road ice and snow</span></div>
         <div><b>0 €</b><span data-i="f3">extra vehicles: cameras ride on transport that already drives</span></div>
       </div>
       <p class="status" style="margin-top:16px" data-i="honest">Honest note: this public site is a demo. There are few real Riga ice photos yet, and the map points are demo data from Mapillary, not live cameras.</p>
@@ -353,7 +353,7 @@ const T = {
   aboutTitle:"How it works",s1:"A camera on a bus or sidewalk tractor takes 1–3 frames per second with GPS and time.",s2:"A small neural network (YOLO11n) labels the sidewalk: dry, wet, snow, ice or not visible.",
   s3:"The risk score joins the photo with the weather for the next hours: temperature, dew point and precipitation give the chance of ice, wet snow and snow. Black ice is invisible on a photo, so the forecast raises the risk where a wet or dry-looking surface is about to freeze. Bridges and model confidence count too; under 60% a person checks it.",
   s4:"Crews see only what they must clean: snow, wet snow and ice in the walking line, plus the Top 10 places to go first, and a forecast for tonight so gritting can be ordered in advance.",s5:"Cleaning check: when a place is marked “treated” and a camera later still sees snow or ice there, the map flags it. This gives the city objective proof of how well the contractor worked.",s6:"Next step: a surface temperature sensor next to the camera, so the system knows the real temperature of the sidewalk, not only of the air, and predicts icing for the next night more precisely.",
-  f1:"of snow found on 682 hand-labelled Riga photos the model never saw, only 1% false alarms (4-fold check)",f2:"winter street photos of Riga collected, about 600 labelled by hand",f3:"extra vehicles: cameras ride on transport that already drives",
+  f1:"of snow found on 682 hand-labelled Riga photos the model never saw, only 1% false alarms (4-fold check)",f2:"winter street photos of Riga labelled by hand, plus open datasets of road ice and snow",f3:"extra vehicles: cameras ride on transport that already drives",
   honest:"Honest note: this public site is a demo. There are few real Riga ice photos yet, and the map points are demo data from Mapillary, not live cameras.",
   src:"Street images: Mapillary, CC BY-SA 4.0 · Training data: Roads dataset (Jeswin Wilson, Roboflow Universe), CC BY 4.0 · Weather: Open-Meteo · Map: © OpenStreetMap contributors",
   levels:{ice:"ice",slush:"wet snow",snow:"snow",treated:"treated",none:"no action needed"},
@@ -370,7 +370,7 @@ const T = {
   aboutTitle:"Kā tas darbojas",s1:"Kamera uz autobusa vai ietvju traktora uzņem 1–3 kadrus sekundē ar GPS un laiku.",s2:"Mazs neironu tīkls (YOLO11n) nosaka ietves stāvokli: sauss, slapjš, sniegs, ledus vai nav redzams.",
   s3:"Riska novērtējums apvieno foto ar laikapstākļiem nākamajām stundām: temperatūra, rasas punkts un nokrišņi dod apledojuma, slapja sniega un sniega iespējamību. Melnais ledus fotogrāfijā nav redzams, tāpēc prognoze paaugstina risku tur, kur slapja vai sausa virsma drīz sasals. Tiek ņemti vērā arī tilti un modeļa ticamība; zem 60% pārbauda cilvēks.",
   s4:"Brigādes redz tikai to, kas jātīra: sniegu, slapju sniegu un ledu gājēju joslā, Top 10 vietas, kur doties vispirms, un prognozi šai naktij, lai kaisīšanu varētu pasūtīt laikus.",s5:"Tīrīšanas pārbaude: ja vieta atzīmēta kā “apstrādāta”, bet kamera vēlāk tur joprojām redz sniegu vai ledu, karte to iezīmē. Tā pašvaldība iegūst objektīvu pierādījumu, cik labi strādājis darbuzņēmējs.",s6:"Nākamais solis: virsmas temperatūras sensors blakus kamerai, lai sistēma zinātu reālo ietves, nevis tikai gaisa temperatūru, un precīzāk prognozētu apledojumu nākamajai naktij.",
-  f1:"sniega atrasti 682 ar roku marķētās Rīgas fotogrāfijās, kuras modelis nebija redzējis; tikai 1% viltus trauksmju (4-kārtīga pārbaude)",f2:"Rīgas ziemas ielu fotogrāfijas savāktas, ap 600 marķētas ar roku",f3:"papildu transporta: kameras brauc ar transportu, kas jau kursē",
+  f1:"sniega atrasti 682 ar roku marķētās Rīgas fotogrāfijās, kuras modelis nebija redzējis; tikai 1% viltus trauksmju (4-kārtīga pārbaude)",f2:"Rīgas ziemas ielu fotogrāfijas, marķētas ar roku, plus atvērtās datu kopas ar ledu un sniegu uz ceļiem",f3:"papildu transporta: kameras brauc ar transportu, kas jau kursē",
   honest:"Godīgi: šī publiskā lapa ir demo. Īstu Rīgas ledus fotogrāfiju vēl ir maz, un kartes punkti ir demo dati no Mapillary, nevis tiešraides kameras.",
   src:"Ielu attēli: Mapillary, CC BY-SA 4.0 · Apmācības dati: Roads dataset (Jeswin Wilson, Roboflow Universe), CC BY 4.0 · Laikapstākļi: Open-Meteo · Karte: © OpenStreetMap contributors",
   levels:{ice:"ledus",slush:"slapjš sniegs",snow:"sniegs",treated:"apstrādāts",none:"nav jārīkojas"},
