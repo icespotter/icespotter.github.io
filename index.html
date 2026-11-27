@@ -497,10 +497,13 @@ const HAZ=["ice","snow"];
 const argmax=P=>Object.keys(P).reduce((a,b)=>P[a]>=P[b]?a:b);
 function topOf(P){const t=argmax(P); return (t==="blocked"||t==="not_visible")?t:argmax({...P,...fuse(P).q})}
 // ice / slush / snow when the whole frame AND the middle third of it (the walking line) show it; otherwise "none"
+// On the map if the whole frame is fairly sure about ice/snow (>=50%) and the middle of the sidewalk
+// still shows some (>=30%). The old rule (middle strip must be TOP ice/snow) missed clear ice: 4/10 vs 7/10 on test photos.
 function hazardKind(p){
-  const full=topOf(p.p||{[p.cls]:p.conf}); if(!HAZ.includes(full)) return "none";
-  if(p.c && !HAZ.includes(topOf(p.c))) return "none";
-  if(full==="ice") return "ice";
+  const P=p.p||{[p.cls]:p.conf}, t=argmax(P); if(t==="blocked"||t==="not_visible") return "none";
+  const q=fuse(P).q; if(q.ice+q.snow<0.5) return "none";
+  if(p.c){const m=fuse(p.c).q; if(m.ice+m.snow<0.3) return "none"}
+  if(q.ice>=q.snow) return "ice";
   return (airT!=null&&airT>-1&&airT<2)?"slush":"snow";
 }
 function level(p,s){const k=hazardKind(p); if(k==="none") return "none"; return treated[p.id]?"treated":k}

@@ -111,7 +111,7 @@ async function shot(){
     if(!SEND.has(cls)) note="not sent";
     else if(light<MIN_LIGHT) note="too dark – not sent";
     else if(conf<MIN_CONF) note="not sure ("+Math.round(conf*100)+"%) – not sent";
-    else if((cls==="snow"||cls==="ice")&&midTop!==cls) note="only at the edge – not sent";
+    else if((cls==="snow"||cls==="ice")&&(C.ice+C.snow)<0.3) note="only at the edge – not sent";
     else if(!pos) note="waiting for GPS";
     else if(last&&last.cls===cls&&dist(last.lat,last.lon,pos.lat,pos.lon)<8) note="same place";
     else{
