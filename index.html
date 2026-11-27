@@ -473,8 +473,7 @@ function renderWeather(){ return;
 // (black ice is invisible on a photo; the forecast says where a surface is about to freeze).
 function fuse(P){
   const g=k=>P[k]||0, T=airT;
-  const iceGivenWet=Math.max(W.iceNow, T==null?0:(T<=0?0.9:(T<=2?0.5:0)));
-  const iw=g("wet")*iceGivenWet, ic=g("clear")*W.iceNow*0.25;
+  const iw=0, ic=g("clear")*W.iceNow*0.25;   // "wet + frost = ice" is off until tuned (damp asphalt often just dries)
   const sn=W.snowNow*0.5, sc=(g("clear")-ic)*sn, sw=(g("wet")-iw)*sn;
   return {q:{ice:g("ice")+iw+ic, snow:g("snow")+sc+sw, wet:g("wet")-iw-sw, clear:g("clear")-ic-sc, not_visible:g("not_visible"), blocked:g("blocked")}, iw, ic, add:sc+sw};
 }
