@@ -364,7 +364,7 @@ const T = {
   src:"Street images: Mapillary, CC BY-SA 4.0 · Training data: Roads dataset (Jeswin Wilson, Roboflow Universe), CC BY 4.0 · Weather: Open-Meteo · Map: © OpenStreetMap contributors",
   levels:{ice:"ice",slush:"wet snow",snow:"snow",treated:"treated",none:"no action needed"},
   classes:{ice:"ice",snow:"snow",wet:"wet",clear:"dry",not_visible:"not visible",blocked:"blocked"},
-  r:{treated:"treated by crew",not_visible:"sidewalk not visible – needs another frame",camera:"camera: {cls} ({conf})",black_ice:"wet at {t} → likely ice",bridge:"bridge {name} – freezes first",stop:"stop “{name}” – many people walk here",low_conf:"needs a human check",blocked:"sidewalk blocked (snowbank, parked car, fence) – people walk on the road",wx_ice:"weather: icing likely ({v}) → ice risk raised",wx_snow:"weather: fresh snow expected ({v})",recheck:"still snow/ice after cleaning at {v}"},
+  r:{treated:"treated by crew",not_visible:"sidewalk not visible – needs another frame",camera:"camera: {cls} ({conf})",black_ice:"wet at {t} → likely ice",bridge:"bridge {name} – freezes first",overdue:"⚠ not treated since yesterday – check the contractor",stop:"stop “{name}” – many people walk here",low_conf:"needs a human check",blocked:"sidewalk blocked (snowbank, parked car, fence) – people walk on the road",wx_ice:"weather: icing likely ({v}) → ice risk raised",wx_snow:"weather: fresh snow expected ({v})",recheck:"still snow/ice after cleaning at {v}"},
   cols:["id","lat","lon","photo date","class","confidence","risk","level","reasons","treated at"]},
  lv:{tag:"RobotHack 2026 · izaicinājums PCH4 Rīgas pašvaldībai",title:"Bīstamās Rīgas ietves",lead:"Kameras uz pilsētas transporta → neironu tīkls → kur sūtīt brigādes vispirms, kas gaidāms šonakt un vai tīrīšana tiešām ir paveikta.",
   tLoading:"Ielādēju Rīgas laikapstākļus…",tNow:"Rīgā tagad (Open-Meteo)",tNone:"Laikapstākļi nav pieejami – iestati manuāli",tHand:"iestatīts manuāli",tManual:"Ja temperatūra būtu… (demo)",fusedNote:"Foto analizē neironu tīkls, pēc tam rezultātu precizē Rīgas laikapstākļu prognoze nākamajām stundām (ledus fotogrāfijā bieži nav redzams).",wxIce:"Apledojums / melnais ledus",wxSlush:"Slapjš sniegs / šķīdonis",wxSnow:"Sniegs",wxPeak:"maksimums {h}",wxNone:"nav riska",wxScen:"scenārijs: {t} visu dienu",
@@ -381,7 +381,7 @@ const T = {
   src:"Ielu attēli: Mapillary, CC BY-SA 4.0 · Apmācības dati: Roads dataset (Jeswin Wilson, Roboflow Universe), CC BY 4.0 · Laikapstākļi: Open-Meteo · Karte: © OpenStreetMap contributors",
   levels:{ice:"ledus",slush:"slapjš sniegs",snow:"sniegs",treated:"apstrādāts",none:"nav jārīkojas"},
   classes:{ice:"ledus",snow:"sniegs",wet:"slapjš",clear:"sauss",not_visible:"nav redzams",blocked:"aizšķērsots"},
-  r:{treated:"brigāde apstrādājusi",not_visible:"ietve nav redzama – vajag citu kadru",camera:"kamera: {cls} ({conf})",black_ice:"slapjš pie {t} → iespējams ledus",bridge:"tilts {name} – sasalst pirmais",stop:"pietura “{name}” – te iet daudz cilvēku",low_conf:"vajag cilvēka pārbaudi",blocked:"ietve aizšķērsota (sniega kaudze, auto, žogs) – gājēji iet pa brauktuvi",wx_ice:"laikapstākļi: iespējams apledojums ({v}) → ledus risks paaugstināts",wx_snow:"laikapstākļi: gaidāms svaigs sniegs ({v})",recheck:"joprojām sniegs/ledus pēc tīrīšanas {v}"},
+  r:{treated:"brigāde apstrādājusi",not_visible:"ietve nav redzama – vajag citu kadru",camera:"kamera: {cls} ({conf})",black_ice:"slapjš pie {t} → iespējams ledus",bridge:"tilts {name} – sasalst pirmais",overdue:"⚠ nav apstrādāts kopš vakardienas – pārbaudiet darbuzņēmēju",stop:"pietura “{name}” – te iet daudz cilvēku",low_conf:"vajag cilvēka pārbaudi",blocked:"ietve aizšķērsota (sniega kaudze, auto, žogs) – gājēji iet pa brauktuvi",wx_ice:"laikapstākļi: iespējams apledojums ({v}) → ledus risks paaugstināts",wx_snow:"laikapstākļi: gaidāms svaigs sniegs ({v})",recheck:"joprojām sniegs/ledus pēc tīrīšanas {v}"},
   cols:["id","lat","lon","foto datums","klase","ticamība","risks","līmenis","iemesli","apstrādāts"]}
 };
 // The map is for snow-clearing crews: only snow, wet snow (slush) and ice in the middle of the sidewalk.
@@ -492,6 +492,7 @@ function score(p){
   if(f.add>0.05) rs.push(["wx_snow",{v:Math.round(W.snowNow*100)+"%"}]);
   const b=bridge(p); if(b){s+=15*Math.max(W.iceNow,q.ice,q.wet>0.3?0.5:0);rs.push(["bridge",{name:b}])}
   const st=nearStop(p); if(st&&q.ice+q.snow>=0.3){s+=15;rs.push(["stop",{name:st}])}
+  if(p.overdue&&q.ice+q.snow>=0.3){s+=20;rs.push(["overdue",{}])}
   const rc=recheckOf(p); if(rc&&HAZ.includes(hazardKind(p))){s+=20;rs.push(["recheck",{v:rc}])}
   if(p.conf<0.6) rs.push(["low_conf",{}]);
   return [Math.round(s),rs];
@@ -748,18 +749,25 @@ const SB_URL="https://vilvnqmsqdzsrdrvdfwl.supabase.co", SB_KEY="sb_publishable_
 const SB_H={apikey:SB_KEY,Authorization:"Bearer "+SB_KEY,"Content-Type":"application/json"};
 const THUMB_OK=/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/;
 let liveSeen=new Set(), liveFirst=true;
+function rigaMidnight(){const now=new Date(), d=now.toLocaleDateString("en-CA",{timeZone:"Europe/Riga"});
+  const off=new Date(now.toLocaleString("en-US",{timeZone:"Europe/Riga"}))-new Date(now.toLocaleString("en-US",{timeZone:"UTC"}));
+  return new Date(new Date(d+"T00:00:00Z").getTime()-off)}
 async function pollLive(){
   try{
-    const since=new Date(Date.now()-24*3600e3).toISOString();
+    // Daily map: today's camera points (from 00:00 Riga time) + yesterday's points that were NOT treated (overdue).
+    // Treated points from earlier days are hidden (they stay in the database for reports).
+    const since=new Date(Date.now()-48*3600e3).toISOString(), today=rigaMidnight();
     const r=await fetch(`${SB_URL}/rest/v1/reports?select=id,created_at,lat,lon,cls,conf,p,c,thumb,treated_at&created_at=gte.${since}&order=id.asc&limit=1000`,{headers:SB_H,cache:"no-store"});
     if(!r.ok) return; const rows=await r.json(); let added=null;
     for(const x of rows){
       const id="live-"+x.id;
       if(x.treated_at) treated[id]=x.treated_at.slice(0,16).replace("T"," ");
+      const old=new Date(x.created_at)<today;
+      if(old&&x.treated_at) continue;
       if(liveSeen.has(id)) continue; liveSeen.add(id);
       if(!CLASSES_ALL.includes(x.cls)||!isFinite(x.lat)||!isFinite(x.lon)) continue;
       const p={id,live:true,lat:+x.lat,lon:+x.lon,cls:x.cls,conf:+x.conf||0,p:x.p||{[x.cls]:+x.conf||1},c:x.c||null,
-        date:x.created_at.slice(0,16).replace("T"," "),thumb:THUMB_OK.test(x.thumb||"")?x.thumb:""};
+        date:x.created_at.slice(0,16).replace("T"," "),thumb:THUMB_OK.test(x.thumb||"")?x.thumb:"",overdue:old};
       points.push(p); added=p;
     }
     if(added){render(); if(!liveFirst&&hazardKind(added)!=="none"){lmap.setView([added.lat,added.lon],16)}}
