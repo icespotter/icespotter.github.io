@@ -34,7 +34,6 @@ a{color:var(--signal)}
 h1,h2,h3{font-family:"Barlow Condensed",Barlow,sans-serif;font-weight:700;line-height:1.05;margin:0}
 .wrap{max-width:1360px;margin:0 auto;padding:0 20px}
 
-/* header */
 header{background:var(--ink);color:#EEF3F6}
 header .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 16px;padding-top:14px;padding-bottom:14px}
 .brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
@@ -44,7 +43,6 @@ header .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:spac
 .lang button{background:none;border:0;color:#C9D4DC;padding:6px 12px;font:600 14px Barlow,sans-serif;cursor:pointer}
 .lang button[aria-pressed=true]{background:#EEF3F6;color:var(--ink)}
 
-/* hero: the map is the hero */
 .hero{display:grid;grid-template-columns:380px 1fr;gap:0;min-height:640px;border-bottom:1px solid var(--line)}
 .rail{background:var(--paper);padding:24px 20px;display:flex;flex-direction:column;gap:20px;border-right:1px solid var(--line);max-height:780px;overflow:auto}
 .rail h1{font-size:44px;letter-spacing:-.3px}
@@ -99,7 +97,6 @@ a.btn{text-decoration:none;display:inline-block}
 .top .goto{border:0;background:none;color:var(--signal);padding:0;text-decoration:underline}
 .empty{color:var(--ink2);font-size:15px}
 
-/* below */
 section.band{padding:48px 0;border-bottom:1px solid var(--line)}
 section.band h2{font-size:38px;margin-bottom:14px}
 .cols{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:start}
@@ -138,12 +135,11 @@ footer .wrap{display:grid;gap:6px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
-/* ===== Design by Anna (Figma "IceSpotter Interface V2"): exact palette and type scale ===== */
 :root{--navy:#062645;--sky:#92CEEE;--steel:#BDD4E5;--pale:#EAF4FB;--white:#FFFFFF;
   --ink:#062645;--ink2:#5B7186;--line:#D3E2EE;--ice:#C8352B;--slush:#E07B1F;--snowc:#2F65AE;--ok:#2F6B45}
 body{background:var(--navy);color:var(--navy);font:400 16px/1.55 Inter,system-ui,sans-serif}
 h1,h2,h3,h4{font-family:"Barlow Condensed",Inter,sans-serif;font-weight:600;letter-spacing:0}
-/* header: 90px, logo + text links */
+
 header{background:var(--navy);border:0}
 header .wrap{max-width:1080px;padding:0;height:90px;display:flex;align-items:center;justify-content:space-between}
 .brand{display:flex;align-items:center;gap:10px}
@@ -153,7 +149,7 @@ header .wrap{max-width:1080px;padding:0;height:90px;display:flex;align-items:cen
 .lang{border:0;gap:24px}
 .lang button{padding:2px 0;color:#fff;font:500 16px Inter,sans-serif;background:none!important;border-bottom:2px solid transparent;border-radius:0}
 .lang button[aria-pressed=true]{color:var(--sky);border-bottom-color:var(--sky)}
-/* hero: 450px rail + map, 630px tall */
+
 .hero{grid-template-columns:450px 1fr;min-height:630px;height:630px;border:0}
 .rail{background:var(--pale);border:0;padding:26px 40px 26px 36px;gap:14px;max-height:630px;overflow:auto;scrollbar-width:thin;scrollbar-color:var(--navy) transparent}
 .rail::-webkit-scrollbar{width:6px}.rail::-webkit-scrollbar-thumb{background:var(--navy);border-radius:3px}
@@ -187,11 +183,11 @@ header .wrap{max-width:1080px;padding:0;height:90px;display:flex;align-items:cen
 .route{padding:16px 18px}.route h3{font-size:24px;color:var(--navy)}
 .qc{border-radius:6px}
 .status{color:var(--ink2)}
-/* map controls & popup */
+
 .leaflet-bar a{color:var(--navy)}
 .leaflet-popup-content-wrapper{border-radius:6px}
 .leaflet-popup-content{font:14px/1.45 Inter,sans-serif;color:var(--navy)}
-/* sections */
+
 .wrap{max-width:1080px;padding:0}
 section.band{background:var(--navy);color:#fff;padding:80px 0 60px;border-bottom:1px solid rgba(189,212,229,.18)}
 section.band h2{font-size:48px;color:#fff;margin-bottom:28px}
@@ -213,14 +209,12 @@ section.band a{color:var(--sky)}
 footer{background:var(--navy);color:#fff;font-size:14px;border-top:1px solid rgba(189,212,229,.18);padding:28px 0 36px}
 footer a{color:#fff;text-decoration:underline}
 
-/* Figma frame is 1842px wide: scale headline sizes x0.78 for a 1440px screen */
 .rail h1{font-size:52px;line-height:1.1;max-width:340px}
 section.band h2{font-size:40px}
 .facts b{font-size:40px}
 .check .drop{font-size:20px}
 .check label.drop{color:#fff}
 
-/* demo drive */
 .demo-ctl a{display:block;background:var(--navy);color:#fff;font:600 14px Inter,sans-serif;padding:8px 12px;border-radius:6px;text-decoration:none;box-shadow:0 2px 8px rgba(6,38,69,.3)}
 .demo-ctl a:hover{background:#0E3A66}
 .demo-banner{position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:1000;background:rgba(6,38,69,.92);color:#fff;font:500 14px Inter,sans-serif;padding:8px 14px;border-radius:6px;max-width:80%;text-align:center;pointer-events:none}
@@ -266,8 +260,6 @@ section.band h2{font-size:40px}
 
     <div class="levels" id="levels" aria-label="Show levels on the map"></div>
     <div class="qc" id="qc" hidden></div>
-
-
 
     <div class="top">
       <h2 data-i="topTitle">Where to send crews: most dangerous first</h2>
@@ -386,13 +378,12 @@ const T = {
   r:{treated:"brigāde apstrādājusi",not_visible:"ietve nav redzama – vajag citu kadru",camera:"kamera: {cls} ({conf})",black_ice:"slapjš pie {t} → iespējams ledus",bridge:"tilts {name} – sasalst pirmais",overdue:"⚠ nav apstrādāts kopš vakardienas – pārbaudiet darbuzņēmēju",stop:"pietura “{name}” – te iet daudz cilvēku",low_conf:"vajag cilvēka pārbaudi",blocked:"ietve aizšķērsota (sniega kaudze, auto, žogs) – gājēji iet pa brauktuvi",wx_ice:"laikapstākļi: iespējams apledojums ({v}) → ledus risks paaugstināts",wx_snow:"laikapstākļi: gaidāms svaigs sniegs ({v})",recheck:"joprojām sniegs/ledus pēc tīrīšanas {v}"},
   cols:["id","lat","lon","foto datums","klase","ticamība","risks","līmenis","iemesli","apstrādāts"]}
 };
-// The map is for snow-clearing crews: only snow, wet snow (slush) and ice in the middle of the sidewalk.
-// Everything else (dry, wet, blocked, not visible, hazards only at the edge) stays in the system and the CSV report.
+
 const LV_ORDER=["ice","slush","snow","treated"];
 const COLOR={ice:"#C8352B",slush:"#E07B1F",snow:"#2F65AE",treated:"#2F6B45",none:"#8C98A3",high:"#C3352B",blocked:"#7A4FA3",clear:"#3D8A57",hidden:"#8C98A3"};
 const CLASS_RISK={ice:100,blocked:80,snow:60,wet:30,clear:0,not_visible:null};
 const BRIDGES={"Akmens tilts":[56.9466,24.0975],"Vanšu tilts":[56.9565,24.0905],"Salu tilts":[56.9395,24.1295],"Dzelzceļa tilts":[56.9420,24.1080]};
-let CLASSES=["clear","ice","not_visible","snow","wet"];   // replaced by model/classes.json
+let CLASSES=["clear","ice","not_visible","snow","wet"];
 
 let lang=(navigator.language||"").startsWith("lv")?"lv":"en";
 let L=T[lang], points=[], airT=null, apiT=null;
@@ -402,14 +393,12 @@ let treated=store.get("ice_treated",{});
 
 const fmtT=t=>(t>0?"+":"")+t.toFixed(1)+"°C";
 function dist(a,b,c,d){const r=6371000,p1=a*Math.PI/180,p2=c*Math.PI/180,dp=p2-p1,dl=(d-b)*Math.PI/180;const x=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;return 2*r*Math.asin(Math.sqrt(x))}
-// public transport stops (Rīgas satiksme GTFS, data.gov.lv, CC0): ice/snow there is more dangerous – many people walk
+
 let STOPS=[];
 function nearStop(p){let best=null,bd=31;for(const [a,b,n] of STOPS){if(Math.abs(a-p.lat)>0.0005||Math.abs(b-p.lon)>0.0009) continue;const d=dist(p.lat,p.lon,a,b);if(d<bd){bd=d;best=n}}return best}
 function bridge(p){for(const [n,[a,b]] of Object.entries(BRIDGES)) if(dist(p.lat,p.lon,a,b)<=150) return n; return null}
-// ---------- weather model (Open-Meteo hourly) ----------
-// Heuristic, explainable risk of ice, wet snow and snow for each hour, from temperature,
-// dew point, precipitation, its probability and type. Not a calibrated forecast.
-let WX=null;          // {hours:[...], nowIdx}
+
+let WX=null;
 let W={ice:0,slush:0,snow:0,iceNow:0,snowNow:0,peak:{}};
 const FREEZING=[56,57,66,67], SNOWCODES=[71,73,75,77,85,86];
 function hourRisk(h,i,Tover){
@@ -419,11 +408,11 @@ function hourRisk(h,i,Tover){
   const snow=pPre*(T<=-1?1:(T<1&&snowy?0.5:0));
   const slush=pPre*(slushT?(snowy?1:0.6):0);
   let past=0,minPast=99; for(let j=Math.max(0,i-12);j<i;j++){past+=h.mm[j]||0;minPast=Math.min(minPast,Tover??h.t[j])}
-  const a=FREEZING.includes(code)?Math.max(pp,0.8):0;                       // freezing rain / drizzle
-  const b=(T>0&&minPast<=-2)?0.7*pPre:0;                                    // rain on frozen ground
-  const c=(T<=0&&past>=0.3)?Math.min(0.9,0.5+past/4):0;                     // wet surface refreezes
-  const d=(T<=0&&(T-Td)<=1)?0.35:0;                                         // hoarfrost / condensation
-  const e=(T<=1&&mm>0&&!snowy)?0.6*pPre:0;                                  // rain/drizzle around 0°C
+  const a=FREEZING.includes(code)?Math.max(pp,0.8):0;
+  const b=(T>0&&minPast<=-2)?0.7*pPre:0;
+  const c=(T<=0&&past>=0.3)?Math.min(0.9,0.5+past/4):0;
+  const d=(T<=0&&(T-Td)<=1)?0.35:0;
+  const e=(T<=1&&mm>0&&!snowy)?0.6*pPre:0;
   return {ice:Math.max(a,b,c,d,e),slush,snow};
 }
 function computeWeather(){
@@ -441,12 +430,12 @@ function renderNight(){
   const el=document.getElementById("night"); if(!WX){el.hidden=true;return}
   const h=WX.hours, i0=WX.nowIdx, manual=document.getElementById("tManual").checked, Tover=manual?airT:null;
   const nowHr=+h.time[i0].slice(11,13);
-  // tonight = 20:00 → 08:00; if it is already night, from now until 08:00
+
   let a=i0; if(nowHr>=8&&nowHr<20) a=i0+(20-nowHr);
   let b=a; while(b<h.t.length-1&&!(h.time[b].slice(11,13)==="08"&&b>a)) b++;
   let ice=0.05,snow=0,slush=0,peak=null,tmin=99;
   for(let i=a;i<=b&&i<h.t.length;i++){const r=hourRisk(h,i,Tover);if(r.ice>ice){ice=r.ice;peak=h.time[i].slice(11,16)}snow=Math.max(snow,r.snow);slush=Math.max(slush,r.slush);tmin=Math.min(tmin,Tover??h.t[i])}
-  // wet sidewalks the cameras already see will freeze if the night goes below 0 °C
+
   const N=L.night, lvl=ice>=0.6?"high":(ice>=0.3?"medium":"low");
   const col=lvl==="high"?COLOR.ice:(lvl==="medium"?COLOR.slush:(snow>=0.5||slush>=0.5?COLOR.snow:COLOR.treated));
   const extra=snow>=0.5?N.snowH:(slush>=0.5?N.slushH:"");
@@ -458,7 +447,7 @@ function renderNight(){
     <span class="a">${esc(act)}</span>`;
   el.hidden=false;
 }
-// cleaning check: a hazard seen by a camera AFTER a nearby place was marked treated
+
 function recheckOf(p){
   if(!p.date||p.date.length<16) return null;
   for(const q of points){ const t=treated[q.id]; if(!t||q===p) continue;
@@ -474,11 +463,10 @@ function renderWeather(){ return;
   const manual=document.getElementById("tManual").checked;
   document.getElementById("wxWhy").textContent=manual&&airT!=null?L.wxScen.replace("{t}",fmtT(airT)):"";
 }
-// Step 2 of the classifier: the network's photo probabilities are adjusted by the weather
-// (black ice is invisible on a photo; the forecast says where a surface is about to freeze).
+
 function fuse(P){
   const g=k=>P[k]||0, T=airT;
-  const iw=0, ic=g("clear")*W.iceNow*0.25;   // "wet + frost = ice" is off until tuned (damp asphalt often just dries)
+  const iw=0, ic=g("clear")*W.iceNow*0.25;
   const sn=W.snowNow*0.5, sc=(g("clear")-ic)*sn, sw=(g("wet")-iw)*sn;
   return {q:{ice:g("ice")+iw+ic, snow:g("snow")+sc+sw, wet:g("wet")-iw-sw, clear:g("clear")-ic-sc, not_visible:g("not_visible"), blocked:g("blocked")}, iw, ic, add:sc+sw};
 }
@@ -502,9 +490,7 @@ function score(p){
 const HAZ=["ice","snow"];
 const argmax=P=>Object.keys(P).reduce((a,b)=>P[a]>=P[b]?a:b);
 function topOf(P){const t=argmax(P); return (t==="blocked"||t==="not_visible")?t:argmax({...P,...fuse(P).q})}
-// ice / slush / snow when the whole frame AND the middle third of it (the walking line) show it; otherwise "none"
-// On the map if the whole frame is fairly sure about ice/snow (>=50%) and the middle of the sidewalk
-// still shows some (>=30%). The old rule (middle strip must be TOP ice/snow) missed clear ice: 4/10 vs 7/10 on test photos.
+
 function hazardKind(p){
   const P=p.p||{[p.cls]:p.conf}, t=argmax(P); if(t==="blocked"||t==="not_visible") return "none";
   const q=fuse(P).q; if(q.ice+q.snow<0.5) return "none";
@@ -518,7 +504,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 
 </script>
 <script>
-// Leaflet map
+
 const mapEl=document.getElementById("map");
 const lmap=window.L.map(mapEl,{scrollWheelZoom:false}).setView([56.9496,24.1052],12);
 window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap contributors"}).addTo(lmap);
@@ -554,12 +540,12 @@ function render(){
   points.forEach(p=>{const [s,rs]=score(p);p.score=s;p.rs=rs;p.level=level(p,s);counts[p.level]++});
   const qn=points.filter(p=>p.level!=="none"&&p.level!=="treated"&&p.rs.some(r=>r[0]==="recheck")).length;
   const qc=document.getElementById("qc"); qc.hidden=!qn; if(qn) qc.innerHTML=`<b>⚠</b>${esc(L.qcText.replace("{n}",qn))}`;
-  // level chips
+
   const lv=document.getElementById("levels"); lv.innerHTML="";
   LV_ORDER.forEach(k=>{const b=document.createElement("button");b.type="button";b.className="lv";b.setAttribute("aria-pressed",show.has(k));
     b.innerHTML=`<span class="n">${counts[k]}</span><span class="t"><i class="dot" style="background:${COLOR[k]}"></i>${esc(L.levels[k])}</span>`;
     b.onclick=()=>{show.has(k)?show.delete(k):show.add(k);render()}; lv.appendChild(b)});
-  // markers
+
   layer.clearLayers();
   points.forEach(p=>{ if(!show.has(p.level)) return;
     const r0=p.level==="ice"?9:7;
@@ -569,7 +555,7 @@ function render(){
     const why=p.rs.map(([c,pr])=>"• "+esc(rtext(c,pr))).join("<br>");
     m.bindPopup(`<b>${esc(L.levels[p.level])}</b>${p.score!=null?` · ${L.risk} ${p.score}`:""}<br>${why}${p.thumb?`<img src="${p.thumb}" alt="">`:""}<br><small>${p.live?"📷 "+esc(L.live)+" · ":""}${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}${p.date?" · "+esc(p.date):""}</small>${(!treated[p.id]&&["ice","slush","snow"].includes(p.level))?`<br><button type="button" class="btn primary poptr" data-id="${esc(p.id)}" style="margin-top:8px">${esc(L.treat)}</button>`:""}`);
     m.addTo(layer); markers[p.id]=m });
-  // full list, most dangerous first; shown 10 at a time
+
   const all=points.filter(p=>hazardKind(p)!=="none"&&p.level!=="treated").sort((a,b)=>b.score-a.score), top=all.slice(0,topShown);
   document.getElementById("topN").textContent=all.length?L.allN.replace("{n}",all.length):"";
   const more=document.getElementById("topMore"); more.hidden=all.length<=top.length; more.textContent=L.more.replace("{n}",all.length-top.length);
@@ -584,17 +570,15 @@ function render(){
     ol.appendChild(li)});
 }
 
-// ---------- crew route: order the places to clean (nearest neighbour + 2-opt), draw it, open in Google Maps ----------
 const routeLayer=window.L.layerGroup().addTo(lmap);
 function tourLen(P){let d=0;for(let i=1;i<P.length;i++) d+=dist(P[i-1].lat,P[i-1].lon,P[i].lat,P[i].lon);return d}
-// Order of stops = shortest OPEN path (the crew does not have to come back).
-// 1) nearest neighbour from every possible first stop, keep the shortest; 2) 2-opt that may also flip the tail.
+
 function nnFrom(start,pts){const left=pts.slice(),t=[start];
   while(left.length){const c=t[t.length-1];let bi=0,bd=1e18;left.forEach((p,i)=>{const d=dist(c.lat,c.lon,p.lat,p.lon);if(d<bd){bd=d;bi=i}});t.push(left.splice(bi,1)[0])} return t}
 function twoOpt(t){const D=(p,q)=>q?dist(p.lat,p.lon,q.lat,q.lon):0; let better=true,guard=0;
   while(better&&guard++<200){better=false;
     for(let i=1;i<t.length-1;i++)for(let k=i+1;k<t.length;k++){
-      const a=t[i-1],b=t[i],c=t[k],d=t[k+1];                  // d is undefined when k is the last stop: open end
+      const a=t[i-1],b=t[i],c=t[k],d=t[k+1];
       if(D(a,c)+D(b,d)<D(a,b)+D(c,d)-1){t.splice(i,k-i+1,...t.slice(i,k+1).reverse());better=true}}}
   return t}
 function planTour(start,pts){
@@ -602,7 +586,7 @@ function planTour(start,pts){
   let best=null; for(const s of pts){const t=nnFrom(s,pts.filter(p=>p!==s)); if(!best||tourLen(t)<tourLen(best)) best=t}
   return twoOpt(best);
 }
-// Points closer than 30 m are one stop for the crew (same piece of sidewalk)
+
 function mergeStops(P){const out=[];for(const p of P){const q=out.find(o=>dist(o.lat,o.lon,p.lat,p.lon)<30); if(q) q.n++; else out.push({lat:p.lat,lon:p.lon,n:1,id:p.id})} return out}
 function routeTargets(){
   const set=document.getElementById("rtSet").value;
@@ -612,7 +596,7 @@ function routeTargets(){
   return set==="top"?P.slice(0,10):P;
 }
 function getMe(){return new Promise(ok=>{if(!navigator.geolocation) return ok(null);navigator.geolocation.getCurrentPosition(p=>ok({lat:p.coords.latitude,lon:p.coords.longitude,me:true}),()=>ok(null),{timeout:8000})})}
-// Real streets from OSRM (OpenStreetMap routing). If it is not reachable we fall back to straight lines + estimate.
+
 async function streetRoute(tour){
   if(tour.length<2||tour.length>90) return null;
   try{const ctl=new AbortController(); setTimeout(()=>ctl.abort(),7000);
@@ -627,7 +611,7 @@ async function planRoute(){
   const tour=planTour(start,T), stopsN=tour.filter(p=>!p.me).length;
   info.textContent="…";
   const sr=await streetRoute(tour);
-  const km=sr?sr.km:tourLen(tour)*1.35/1000, min=Math.round((sr?sr.min*1.3:km/20*60)+stopsN*3);   // town traffic + 3 min per stop
+  const km=sr?sr.km:tourLen(tour)*1.35/1000, min=Math.round((sr?sr.min*1.3:km/20*60)+stopsN*3);
   window.L.polyline(sr?sr.line:tour.map(p=>[p.lat,p.lon]),sr?{color:"#062645",weight:5,opacity:.8}:{color:"#062645",weight:3,dashArray:"6 6",opacity:.85}).addTo(routeLayer);
   let n=0; tour.forEach(p=>{ if(p.me){window.L.circleMarker([p.lat,p.lon],{radius:7,color:"#fff",weight:2,fillColor:"#2F65AE",fillOpacity:1}).addTo(routeLayer);return} n++;
     window.L.marker([p.lat,p.lon],{icon:window.L.divIcon({className:"",html:`<div class="rnum">${n}</div>`,iconSize:[24,24],iconAnchor:[12,12]}),zIndexOffset:1000}).addTo(routeLayer)});
@@ -640,9 +624,8 @@ async function planRoute(){
 document.getElementById("rtGo").onclick=planRoute;
 document.getElementById("rtClear").onclick=()=>{routeLayer.clearLayers();document.getElementById("rtNav").hidden=true;document.getElementById("rtClear").hidden=true;document.getElementById("rtInfo").textContent=""};
 
-// ---------- camera routes on public transport (Rīgas satiksme GTFS) ----------
 let TR=[], camSel=new Set(); const camLayer=window.L.layerGroup().addTo(lmap);
-const CELL=(lat,lon)=>Math.round(lat/0.0009)+":"+Math.round(lon/0.0016);           // ~100 x 100 m cells
+const CELL=(lat,lon)=>Math.round(lat/0.0009)+":"+Math.round(lon/0.0016);
 function cellsOf(r){ if(r._cells) return r._cells; const m=new Map();
   r.L.forEach(line=>{for(let i=1;i<line.length;i++){const [a,b]=line[i-1],[c,d]=line[i];const n=Math.max(1,Math.ceil(dist(a,b,c,d)/50));
     for(let k=0;k<=n;k++){const la=a+(c-a)*k/n,lo=b+(d-b)*k/n;m.set(CELL(la,lo),[la,lo])}}});
@@ -670,7 +653,7 @@ function renderCamList(){
       l.innerHTML=`<input type="checkbox" ${camSel.has(r.id)?"checked":""}><i class="sw" style="background:${r.c==="#000000"?"#4A5866":r.c}"></i>${esc(r.n)} <small>${r.hw?esc(L.cmEvery.replace("{m}",Math.round(r.hw))):esc(L.cmNo)} · ${r.km} km</small>`;
       l.querySelector("input").onchange=e=>{e.target.checked?camSel.add(r.id):camSel.delete(r.id);renderCam()}; box.appendChild(l)})});
 }
-// greedy: each step take the route that adds the most new street cells, counting frequent service (<=15 min) double
+
 document.getElementById("cmBest").onclick=()=>{
   camSel=new Set(); const covered=new Set();
   for(let k=0;k<5;k++){let bestR=null,bestG=0;
@@ -682,7 +665,6 @@ document.getElementById("cmNone").onclick=()=>{camSel=new Set();renderCamList();
 document.getElementById("camBox").addEventListener("toggle",e=>{ if(e.target.open&&!TR.length)
   fetch("transport_routes.json",{cache:"no-cache"}).then(r=>r.json()).then(d=>{TR=d.routes;renderCamList()}) });
 
-// ---------- DEMO DRIVE: scripted, works without weather, Wi-Fi camera or snow in the room ----------
 let demo=null;
 const DemoCtl=window.L.Control.extend({options:{position:"topright"},onAdd(){const d=window.L.DomUtil.create("div","demo-ctl");d.innerHTML='<a href="#" role="button" id="demoBtn"></a>';window.L.DomEvent.disableClickPropagation(d);d.querySelector("a").onclick=e=>{e.preventDefault();demo?stopDemo():startDemo()};return d}});
 lmap.addControl(new DemoCtl());
@@ -698,8 +680,8 @@ function along(path,d){let acc=0;for(let i=1;i<path.length;i++){const [a,b]=path
   const [a,b]=path[path.length-1];return {lat:a,lon:b,dl:0,dn:0}}
 async function startDemo(){
   if(!TR.length){try{TR=(await fetch("transport_routes.json").then(r=>r.json())).routes}catch(e){}}
-  // drive along real streets: Brīvības iela from the Freedom Monument to the VEF area (OSRM), fallback = bus 22 line
-  const WP=[[56.9514,24.1133],[56.9806,24.2000]];   // OSRM keeps to Brīvības iela; we drive the first ~4 km
+
+  const WP=[[56.9514,24.1133],[56.9806,24.2000]];
   const sr=await streetRoute(WP.map(([lat,lon])=>({lat,lon})));
   let path=sr?sr.line:null;
   if(path){let acc=0,i=1;for(;i<path.length&&acc<4200;i++) acc+=dist(path[i-1][0],path[i-1][1],path[i][0],path[i][1]); path=path.slice(0,i)}
@@ -717,7 +699,7 @@ async function startDemo(){
   for(let s=0;s<=steps&&demo&&demo.run;s++){
     const d=total*s/steps, q=along(path,d); veh.setLatLng([q.lat,q.lon]);
     if(d>=next&&k<SEQ.length){ const c=SEQ[k++]; next+=total/15;
-      const n=Math.hypot(q.dl,q.dn)||1, off=0.00009;                    // put the point on the sidewalk, ~10 m to the right
+      const n=Math.hypot(q.dl,q.dn)||1, off=0.00009;
       const pt={id:"demo-"+k,demo:true,lat:q.lat-q.dn/n*off*0.6,lon:q.lon+q.dl/n*off,cls:c==="ice"?"ice":c,conf:.9,p:P(c),c:P(c),date:nowStr(),
         thumb:(TH[c]||[])[k%Math.max(1,(TH[c]||[]).length)]||""};
       points.push(pt); demo.pts.push(pt); render(); }
@@ -745,11 +727,9 @@ document.getElementById("csv").onclick=()=>{
   const blob=new Blob(["﻿"+rows.join("\n")],{type:"text/csv;charset=utf-8"});
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="icespotter_report.csv";a.click();URL.revokeObjectURL(a.href)};
 
-// data + weather
 fetch("stops.json").then(r=>r.json()).then(d=>{STOPS=d.s||[];render()}).catch(()=>{});
 fetch("points.json",{cache:"no-cache"}).then(r=>r.json()).then(d=>{points=d.map(p=>({...p,thumb:`thumbs/${p.id}.jpg`})).concat(points.filter(p=>p.live));render()});
 
-// ---------- live points from the camera module (camera.html) via Supabase ----------
 const SB_URL="https://vilvnqmsqdzsrdrvdfwl.supabase.co", SB_KEY="sb_publishable_JPBRxTHo05W5Mn03Xj3eTA_EvyMCxKI";
 const SB_H={apikey:SB_KEY,Authorization:"Bearer "+SB_KEY,"Content-Type":"application/json"};
 const THUMB_OK=/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/;
@@ -762,8 +742,7 @@ function rigaMidnight(){const now=new Date(), d=now.toLocaleDateString("en-CA",{
   return new Date(new Date(d+"T00:00:00Z").getTime()-off)}
 async function pollLive(){
   try{
-    // Daily map: today's camera points (from 00:00 Riga time) + yesterday's points that were NOT treated (overdue).
-    // Treated points from earlier days are hidden (they stay in the database for reports).
+
     const since=new Date(Date.now()-48*3600e3).toISOString(), today=rigaMidnight();
     const r=await fetch(`${SB_URL}/rest/v1/reports?select=id,created_at,lat,lon,cls,conf,p,c,thumb,treated_at&created_at=gte.${since}&order=id.asc&limit=1000`,{headers:SB_H,cache:"no-store"});
     if(!r.ok) return; const rows=await r.json(); let added=null;
@@ -799,7 +778,6 @@ fetch("https://api.open-meteo.com/v1/forecast?latitude=56.9496&longitude=24.1052
 }
 loadWeather();
 
-// ---------- photo check (ONNX in the browser)
 let session=null, pending=null;
 const status=t=>document.getElementById("mStatus").textContent=t;
 async function loadLib(src){return new Promise((ok,no)=>{const s=document.createElement("script");s.src=src;s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
@@ -815,8 +793,8 @@ async function getSession(){
 function toTensor(img,roi,mid){
   let sx=0,sy=0,sw=img.naturalWidth,sh=img.naturalHeight;
   if(roi){sx=sw*0.25;sy=sh*0.65;sw=sw*0.5;sh=sh*0.33}
-  if(mid){sx+=sw/3;sw=sw/3}   // middle third = the walking line
-  // thumbnail to 320 like the server, then resize shortest side to 224 and centre-crop
+  if(mid){sx+=sw/3;sw=sw/3}
+
   let k=Math.min(1,320/Math.max(sw,sh)); let w=Math.round(sw*k), h=Math.round(sh*k);
   const c1=document.createElement("canvas");c1.width=w;c1.height=h;c1.getContext("2d").drawImage(img,sx,sy,sw,sh,0,0,w,h);
   const s=224/Math.min(w,h), W=Math.max(224,Math.round(w*s)), H=Math.max(224,Math.round(h*s));

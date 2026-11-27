@@ -56,8 +56,7 @@ button.go:focus-visible{outline:3px solid #7FB2F0;outline-offset:3px}
   </div>
 </main>
 <script>
-// The camera module: the neural network runs here on the phone. Only snow / ice / wet results
-// (with a small photo) are sent to the server; dry frames never leave the device.
+
 const SB_URL="https://vilvnqmsqdzsrdrvdfwl.supabase.co", SB_KEY="sb_publishable_JPBRxTHo05W5Mn03Xj3eTA_EvyMCxKI";
 const SEND=new Set(["ice","snow","wet","blocked"]);
 const NAME={ice:"Ice",snow:"Snow",wet:"Wet",clear:"Clear",not_visible:"Not visible",blocked:"Blocked"};
@@ -77,7 +76,7 @@ async function getSession(){
   session=await ort.InferenceSession.create("model/icespotter_v8.onnx",{executionProviders:["wasm"]});
   return session;
 }
-// same preprocessing as the site and the server: thumbnail to 320, shortest side to 224, centre crop
+
 function tensor(src,sx,sy,sw,sh){
   const k=Math.min(1,320/Math.max(sw,sh)), w=Math.round(sw*k), h=Math.round(sh*k);
   const c1=document.createElement("canvas");c1.width=w;c1.height=h;c1.getContext("2d").drawImage(src,sx,sy,sw,sh,0,0,w,h);
@@ -90,10 +89,10 @@ function tensor(src,sx,sy,sw,sh){
 }
 async function probs(t){const o=await session.run({[session.inputNames[0]]:t});const a=Array.from(o[session.outputNames[0]].data);return Object.fromEntries(CLASSES.map((c,i)=>[c,a[i]]))}
 const topCls=P=>Object.keys(P).reduce((a,b)=>P[a]>=P[b]?a:b);
-// GDPR: send only the lower part of the frame (the sidewalk), slightly blurred, so faces and number plates are not stored
+
 function thumb(v){const W=v.videoWidth,H=v.videoHeight,sy=Math.round(H*0.45),sh=H-sy,w=240,h=Math.round(w*sh/W);
   const c=document.createElement("canvas");c.width=w;c.height=h;const g=c.getContext("2d");g.filter="blur(1.5px)";g.drawImage(v,0,sy,W,sh,0,0,w,h);return c.toDataURL("image/jpeg",0.6)}
-// mean brightness (0-255) of the lower part of the frame: at night without light the model sees "snow" in dark asphalt
+
 function brightness(v){const c=document.createElement("canvas");c.width=64;c.height=36;const g=c.getContext("2d");
   g.drawImage(v,0,v.videoHeight*0.45,v.videoWidth,v.videoHeight*0.55,0,0,64,36);const d=g.getImageData(0,0,64,36).data;let s=0;
   for(let i=0;i<d.length;i+=4) s+=.299*d[i]+.587*d[i+1]+.114*d[i+2]; return s/(d.length/4)}
